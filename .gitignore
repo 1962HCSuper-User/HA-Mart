@@ -22,3 +22,123 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Instrumented libs
+lib-cov
+
+# Coverage directory
+coverage
+*.lcov
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower
+bower_components
+
+# node-waf
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Snowpack deps
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# REPL history
+.node_repl_history
+
+# npm pack output
+*.tgz
+
+# Yarn Integrity
+.yarn-integrity
+
+# dotenv env files
+.env
+.env.*
+!.env.example
+
+# parcel
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt build output
+.nuxt
+
+# Gatsby files
+.cache/
+
+# vuepress
+.vuepress/dist
+
+# Vite/Vitepress/Svelte kit cache
+.temp
+.cache
+.svelte-kit/
+**/.vitepress/dist
+**/.vitepress/cache
+
+# Docusaurus
+.docusaurus
+
+# Serverless
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB local
+.dynamodb/
+
+# Firebase cache
+.firebase/
+
+# TernJS port
+.tern-port
+
+# VSCode testing
+.vscode-test
+
+# yarn v3
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Vite log timestamp files
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
