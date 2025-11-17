@@ -1,0 +1,40 @@
+.product-grid-section {
+  padding: 10px 15px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-grid-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f1111;
+  margin-bottom: 15px;
+}
+
+/* Amazon-like horizontal scroll row */
+.scroll-container {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 10px;
+}
+
+.scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Keep card width consistent while scrolling */
+.scroll-container > * {
+  flex: 0 0 auto;
+}

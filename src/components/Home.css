@@ -1,0 +1,448 @@
+/* Home.css - Professional Amazon-style e-commerce home */
+/* Global resets and typography */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+.home-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Section titles */
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 40px 0 20px;
+  color: #111;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* NEW: History Section (Top horizontal like pajama screenshot) */
+.history-section {
+  margin-bottom: 40px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.see-more {
+  font-size: 1rem;
+  color: #0066c0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.see-more:hover {
+  text-decoration: underline;
+}
+
+/* Banner Section */
+.banner-section {
+  margin-bottom: 40px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.banner-img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.slick-dots {
+  bottom: 10px;
+}
+
+.slick-dots li button:before {
+  color: #fff;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.slick-dots li.slick-active button:before {
+  opacity: 1;
+}
+
+/* Categories Section */
+.categories-section {
+  margin-bottom: 40px;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.category-card {
+  text-decoration: none;
+  display: block;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Softer shadow */
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.category-image-wrapper img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.category-name {
+  text-align: center;
+  padding: 15px;
+  font-weight: bold;
+  color: #111;
+  background-color: #fff;
+}
+
+/* Fashion & Beauty Grids (Updated to use Amazon cards) */
+.fashion-section, .beauty-section {
+  margin-bottom: 40px;
+}
+
+.fashion-grid, .beauty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Wider for grids */
+  gap: 20px;
+}
+
+.amazon-grid-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Unified Amazon Card Styles - Professional, matching screenshots */
+.amazon-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  padding: 12px; /* Consistent, clean padding */
+  height: auto; /* Flexible height, no fixed */
+  display: flex;
+  flex-direction: column;
+}
+
+.amazon-card:hover, .amazon-grid-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.amazon-img-wrap {
+  height: 200px; /* Slightly taller for better visibility */
+  overflow: hidden;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.amazon-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.amazon-card:hover .amazon-img-wrap img {
+  transform: scale(1.02);
+}
+
+.deal-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.deal-badge {
+  background: #cc0f35; /* Red like Amazon discounts */
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.deal-text {
+  font-size: 0.85rem;
+  color: #b12704;
+  font-weight: 500;
+}
+
+.price-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.deal-price {
+  font-size: 1.4rem; /* Larger for emphasis */
+  font-weight: bold;
+  color: #b12704;
+}
+
+.mrp {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.product-title {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  color: #111;
+  height: auto; /* No clamp, let it flow */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* NEW: Ratings line like screenshot */
+.rating-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.stars {
+  color: #ffa41c; /* Gold stars */
+  font-weight: bold;
+}
+
+.reviews {
+  color: #666;
+}
+
+.colour-row {
+  display: flex;
+  gap: 4px;
+  margin-top: auto; /* Push to bottom */
+}
+
+.colour-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #ddd; /* Border like Amazon */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.colour-dot:hover {
+  transform: scale(1.2);
+}
+
+/* Other Sections (Unchanged but with softer shadows) */
+.saving-zone, .featured-section, .trending-section, .match-section, .premium-section {
+  margin-bottom: 40px;
+}
+
+.audience-section {
+  margin-bottom: 40px;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.audience-card {
+  text-decoration: none;
+  display: block;
+  transition: transform 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.audience-card:hover {
+  transform: translateY(-3px);
+}
+
+.audience-image-wrapper {
+  height: 200px;
+  overflow: hidden;
+}
+
+.audience-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.audience-name {
+  text-align: center;
+  padding: 15px;
+  font-weight: bold;
+  color: #111;
+  background-color: #fff;
+}
+
+.brands-section {
+  margin-bottom: 40px;
+}
+
+.brands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+.brand-logo {
+  text-align: center;
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.brand-logo:hover {
+  transform: scale(1.05);
+}
+
+.brand-logo img {
+  width: 80px;
+  height: 40px;
+  object-fit: contain;
+  margin-bottom: 5px;
+}
+
+.brand-name {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Loading and Error States */
+.loading, .error, .no-products {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error {
+  color: #d00;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .home-container {
+    padding: 0 15px;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .fashion-grid, .beauty-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .banner-img {
+    height: 300px;
+  }
+  
+  .amazon-img-wrap {
+    height: 180px;
+  }
+}
+
+@media (max-width: 600px) {
+  .categories-grid, .audience-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .brands-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .fashion-grid, .beauty-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .deal-line, .price-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-grid, .audience-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .brands-grid {
+    grid-template-columns: 2fr;
+  }
+  
+  .banner-img {
+    height: 250px;
+  }
+  
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* Slick Carousel Overrides */
+.slick-slider {
+  margin: 0 -10px;
+}
+
+.slick-list {
+  margin: 0 10px;
+}
+
+.slick-track {
+  display: flex;
+}
+
+.slick-slide > div {
+  height: 100%;
+  padding: 0 5px;
+}

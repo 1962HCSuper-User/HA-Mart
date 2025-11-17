@@ -1,0 +1,130 @@
+/* MAIN WRAPPER */
+.bw-section {
+  margin-top: 35px;
+  background: #ffffff;
+  padding: 20px 24px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+  animation: fadeIn 0.5s ease;
+}
+
+.bw-heading {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: #0f1111;
+}
+
+/* FLEX CONTAINER */
+.bw-container {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+/* PRODUCT CARD */
+.bw-card {
+  width: 210px;
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e2e2;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.bw-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+/* IMAGE BOX */
+.bw-img-box {
+  width: 100%;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.bw-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* TITLE + PRICE */
+.bw-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 8px 0;
+  color: #111;
+  height: 38px;
+  overflow: hidden;
+}
+
+.bw-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #b12704;
+}
+
+/* PLUS SIGN */
+.bw-plus {
+  font-size: 36px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* TOTAL PANEL */
+.bw-total-panel {
+  margin-left: auto;
+  text-align: left;
+  padding: 18px 20px;
+  background: #f7f7f7;
+  border-radius: 12px;
+  min-width: 200px;
+  border: 1px solid #dcdcdc;
+  animation: slideIn 0.5s ease;
+}
+
+.bw-total {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #0f1111;
+}
+
+/* BUTTON */
+.bw-btn {
+  background: #ffd814;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  width: 100%;
+}
+
+.bw-btn:hover {
+  background: #f7ca00;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}

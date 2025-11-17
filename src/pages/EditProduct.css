@@ -1,0 +1,154 @@
+.edit-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  font-family: "Poppins", sans-serif;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.edit-container h2 {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.edit-container h2::after {
+  content: "";
+  display: block;
+  width: 70px;
+  height: 3px;
+  background: #007bff;
+  margin: 10px auto;
+  border-radius: 5px;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.edit-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  font-size: 15px;
+  color: #444;
+}
+
+.edit-form input,
+.edit-form textarea,
+.edit-form select {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.edit-form input:focus,
+.edit-form textarea:focus,
+.edit-form select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  outline: none;
+}
+
+.edit-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.preview-img {
+  display: block;
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin: 10px auto 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.preview-img:hover {
+  transform: scale(1.05);
+}
+
+.btn-update {
+  background: linear-gradient(135deg, #007bff, #00b4d8);
+  color: white;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-update:hover {
+  background: linear-gradient(135deg, #0056b3, #0096c7);
+  transform: translateY(-2px);
+}
+
+.message {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 500;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.message:empty {
+  display: none;
+}
+
+.message:contains("✅") {
+  color: #0f5132;
+  background: #d1e7dd;
+  border: 1px solid #badbcc;
+}
+
+.message:contains("❌") {
+  color: #842029;
+  background: #f8d7da;
+  border: 1px solid #f5c2c7;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .edit-container {
+    padding: 25px;
+    border-radius: 10px;
+  }
+
+  .edit-container h2 {
+    font-size: 22px;
+  }
+
+  .edit-form input,
+  .edit-form textarea {
+    font-size: 14px;
+  }
+
+  .btn-update {
+    font-size: 15px;
+  }
+
+  .preview-img {
+    width: 150px;
+    height: 150px;
+  }
+}

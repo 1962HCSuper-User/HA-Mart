@@ -1,0 +1,132 @@
+.inventory-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.inventory-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 25px;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.empty-inventory {
+  text-align: center;
+}
+
+.btn-new {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.product-info {
+  padding: 15px;
+}
+
+.product-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 5px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.price {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.discount {
+  font-size: 0.9rem;
+  color: green;
+}
+
+.status {
+  margin-top: 8px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.status.active {
+  color: green;
+}
+
+.status.inactive {
+  color: orange;
+}
+
+.status.out {
+  color: red;
+}
+
+.button-group {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-edit,
+.btn-submit {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-edit {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-submit {
+  background: #28a745;
+  color: white;
+}
+
+.message {
+  text-align: center;
+  margin-top: 15px;
+}

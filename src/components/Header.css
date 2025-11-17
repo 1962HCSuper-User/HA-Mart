@@ -1,0 +1,192 @@
+.header {
+  position: sticky;
+  top: 25px;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  color: #333;
+  font-family: "Poppins", sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  padding: 3px 0; /* further reduced */
+  max-height: 180px; /* reduced max height */
+}
+
+/* --- Top Navbar --- */
+.nav-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 2vw; /* further reduced padding */
+  height: 50px; /* fixed height for compactness */
+}
+
+.logo a {
+  font-size: 1.1rem; /* further reduced */
+  font-weight: 600;
+  color: #4a5568; /* softer gray-blue for premium feel */
+  text-decoration: none;
+}
+
+/* --- Search Bar --- */
+.search-bar {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 240px; /* smaller */
+  margin: 0 8px;
+  border: 1px solid #e2e8f0; /* lighter border */
+  border-radius: 12px; /* softer radius */
+  background: #f7fafc; /* light cool gray */
+  padding: 1px 6px; /* further reduced */
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 3px 5px; /* further reduced */
+  font-size: 0.8rem; /* smaller */
+  color: #4a5568; /* matching text color */
+}
+
+.search-bar button {
+  background: #edf2f7; /* light neutral instead of orange */
+  border: none;
+  border-radius: 50%;
+  padding: 3px; /* further reduced */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.search-bar button:hover {
+  background: #e2e8f0; /* even lighter hover */
+}
+
+/* --- Nav Links --- */
+.nav-links {
+  display: flex;
+  gap: 12px; /* smaller gap */
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #4a5568; /* softer color */
+  font-size: 0.8rem; /* smaller */
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: #3182ce; /* softer blue */
+}
+
+/* --- Icons --- */
+.icons {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* smaller gap */
+}
+
+.icons .icon {
+  font-size: 1.1rem; /* smaller */
+  cursor: pointer;
+  color: #4a5568; /* softer color */
+  transition: color 0.2s, transform 0.2s;
+}
+
+.icons .icon:hover {
+  color: #3182ce; /* softer blue */
+  transform: scale(1.05); /* subtler scale */
+}
+
+/* --- Category Bar --- */
+.category-bar {
+  background-color: #f7fafc; /* light cool gray */
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: center;
+  gap: 8px; /* smaller gap */
+  padding: 3px 0; /* further reduced */
+  height: 32px; /* fixed compact height */
+}
+
+.category-btn {
+  background: transparent;
+  border: none;
+  color: #718096; /* light gray */
+  font-size: 0.8rem; /* smaller */
+  cursor: pointer;
+  transition: color 0.2s, border-bottom 0.2s;
+  padding: 1px 3px; /* further reduced */
+  font-weight: 500;
+}
+
+.category-btn:hover {
+  color: #3182ce; /* softer blue */
+  border-bottom: 1px solid #3182ce; /* thinner underline */
+}
+
+/* --- Profile Dropdown --- */
+.profile-container {
+  position: relative;
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: 32px; /* adjusted for smaller header */
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* softer shadow */
+  padding: 4px 0; /* further reduced */
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px; /* smaller */
+  border: 1px solid #e2e8f0; /* light border for premium feel */
+}
+
+.profile-dropdown a,
+.profile-dropdown button {
+  padding: 5px 12px; /* adjusted */
+  color: #4a5568;
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-size: 0.8rem; /* smaller */
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* space for icons */
+  transition: background 0.2s;
+  font-weight: 500;
+}
+
+.profile-dropdown a:hover,
+.profile-dropdown button:hover {
+  background: #f7fafc; /* light hover */
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .search-bar {
+    max-width: 100%;
+  }
+
+  .nav-top {
+    padding: 3px 4vw;
+  }
+}

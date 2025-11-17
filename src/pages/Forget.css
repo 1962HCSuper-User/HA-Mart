@@ -1,0 +1,35 @@
+.auth-container {
+  max-width: 400px;
+  margin: 80px auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+}
+.auth-container input {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.auth-container button {
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.auth-container .message {
+  text-align: center;
+  color: green;
+  margin-top: 10px;
+}

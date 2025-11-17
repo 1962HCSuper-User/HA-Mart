@@ -1,0 +1,230 @@
+.footer {
+  background: #ffffff !important;
+  color: #333 !important;
+  font-family: "Poppins", sans-serif;
+  padding: 60px 6vw 25px;
+  border-top: 1px solid #f3f3f3;
+  box-shadow: 0 -3px 10px rgba(240, 240, 240, 0.6);
+  position: relative;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* --- Subtle entrance animation --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Top Section --- */
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+  border-bottom: 1px solid #f7f7f7;
+  padding-bottom: 30px;
+  background: #ffffff !important; /* Ensure white background */
+}
+
+.newsletter,
+.app-download {
+  background: #ffffff !important; /* Force white for sections */
+}
+
+.newsletter h3,
+.app-download h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50 !important; /* Dark for visibility */
+  margin-bottom: 8px;
+}
+
+.newsletter p,
+.app-download p {
+  font-size: 0.9rem;
+  color: #6c757d !important; /* Medium grey for contrast */
+  margin-bottom: 14px;
+}
+
+/* Newsletter Input */
+.newsletter-input {
+  display: flex;
+  gap: 10px;
+  max-width: 340px;
+}
+
+.newsletter-input input {
+  flex: 1;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #ffffff !important; /* White input bg */
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s ease;
+  color: #333 !important; /* Dark text in input */
+}
+
+.newsletter-input input::placeholder {
+  color: #999 !important; /* Lighter placeholder */
+}
+
+.newsletter-input input:focus {
+  border-color: #ffb6c1;
+  box-shadow: 0 0 0 3px rgba(255, 182, 193, 0.15);
+  transform: scale(1.02);
+}
+
+.newsletter-input button {
+  background: linear-gradient(135deg, #ffb6c1, #ffe4e1);
+  color: #fff !important; /* White text on gradient */
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(255, 182, 193, 0.25);
+}
+
+.newsletter-input button:hover {
+  background: linear-gradient(135deg, #ff9eb4, #ffc1cc);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* --- App Store Buttons --- */
+.app-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.app-buttons img {
+  height: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.app-buttons img:hover {
+  transform: translateY(-4px);
+}
+
+/* --- Middle Section --- */
+.footer-middle {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 50px;
+  padding: 40px 0;
+  background: #ffffff !important; /* Ensure white */
+}
+
+.footer-section {
+  min-width: 180px;
+  background: #ffffff !important; /* White for each section */
+}
+
+.footer-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222 !important; /* Dark for visibility */
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.footer-section h4::after {
+  content: "";
+  display: block;
+  width: 45px;
+  height: 3px;
+  background: linear-gradient(90deg, #ffb6c1, #ffe4e1);
+  margin-top: 6px;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.footer-section:hover h4::after {
+  width: 60px;
+}
+
+.footer-section a {
+  display: block;
+  color: #555 !important; /* Dark links */
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.footer-section a:hover {
+  color: #ff7aa8 !important;
+  transform: translateX(5px);
+}
+
+/* --- Social Icons --- */
+.social-icons {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.social-icons a {
+  color: #555 !important; /* Dark icons */
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #f0f0f0;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  background: #ffffff !important; /* White bg */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.social-icons a:hover {
+  background: linear-gradient(135deg, #ffb6c1, #ffe4e1);
+  color: #e99abf !important; /* White on hover */
+  border: none;
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(255, 182, 193, 0.3);
+}
+
+/* --- Bottom Section --- */
+.footer-bottom {
+  border-top: 1px solid #f5f5f5;
+  text-align: center;
+  padding-top: 18px;
+  font-size: 0.85rem;
+  color: #6c757d !important; /* Medium grey */
+  letter-spacing: 0.2px;
+  background: #ffffff !important; /* White bg */
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .footer-top,
+  .footer-middle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 30px;
+  }
+  .newsletter-input {
+    flex-direction: column;
+    width: 100%;
+  }
+  .newsletter-input button {
+    width: 100%;
+  }
+  .app-buttons,
+  .social-icons {
+    justify-content: center;
+  }
+}

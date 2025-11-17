@@ -1,0 +1,841 @@
+/* Updated Home.css - Professional, full-width layout with enhanced product GUI */
+/* Removed side margins for full-page fit; added shadows, hover effects, gradients for attractiveness */
+/* Ensured no top margin; added new audience section; premium now carousel with white/light theme */
+/* NEW: Added .fashion-grid for 2-column layout like the provided clothing image, with product boxes and pricing below */
+/* UPDATED: Enhanced .beauty-product-card to strictly match image: Red badge top-left with "5% off", "Limited time deal" text below badge in red, yellow + add button bottom-right, exact pricing format with "M.R.P" (no line-through), image heights adjusted for product/model fit */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #ffffff; /* Changed to pure white for lighter, professional feel */
+}
+
+.home-container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  margin-top: 0 !important; /* Explicitly remove any top margin */
+  overflow-x: hidden;
+}
+
+/* Banner Section - Full-width hero */
+.banner-section {
+  width: 100%;
+  overflow: hidden;
+  margin-top: 0; /* Ensure no top spacing */
+}
+
+.banner-section .banner-img {
+  width: 100%;
+  height: 500px;
+  object-fit: cover;
+}
+
+.banner-section .slick-dots {
+  bottom: 20px;
+}
+
+.banner-section .slick-dots li button:before {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.banner-section .slick-dots li.slick-active button:before {
+  color: white;
+}
+
+/* Section Titles - Professional typography */
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+  margin: 40px 0 20px;
+  letter-spacing: 0.5px;
+}
+
+/* Categories Section - Clean grid */
+.categories-section .categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+  margin: 0;
+}
+
+.category-card {
+  text-decoration: none;
+  text-align: center;
+  color: #333;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Lighter shadow for professional look */
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.category-image-wrapper {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.category-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover img {
+  transform: scale(1.05);
+}
+
+.category-name {
+  padding: 15px;
+  margin: 0;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* New: Audience Section - Similar to categories but lighter styling */
+.audience-section .audience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+  margin: 0;
+}
+
+.audience-card {
+  text-decoration: none;
+  text-align: center;
+  color: #333;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Light shadow */
+  border: 1px solid #f0f0f0; /* Subtle border for definition */
+}
+
+.audience-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-color: #e0e0e0;
+}
+
+.audience-image-wrapper {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.audience-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.audience-card:hover img {
+  transform: scale(1.05);
+}
+
+.audience-name {
+  padding: 12px;
+  margin: 0;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+/* Product Sections - Full-width sliders */
+.saving-zone, 
+.featured-section, 
+.trending-section, 
+.match-section, 
+.beauty-section,
+.fashion-section {
+  padding: 0 20px;
+  margin: 0;
+}
+
+.saving-zone .slick-slider,
+.featured-section .slick-slider,
+.trending-section .slick-slider,
+.match-section .slick-slider,
+.beauty-section .slick-slider {
+  margin: 0;
+  padding: 0;
+}
+
+/* NEW: Fashion Grid Layout - Matches the provided clothing image: 2-column grid with product boxes and pricing below */
+.fashion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 0 20px;
+  margin: 20px 0;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.fashion-product-card {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  padding: 20px;
+  border: 1px solid #f0f0f0;
+}
+
+.fashion-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.fashion-image-wrapper {
+  width: 100%;
+  height: 350px; /* Taller for clothing images like in the image */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9f9f9;
+  overflow: hidden;
+  margin-bottom: 15px;
+  position: relative; /* For absolute positioning of add-btn */
+}
+
+.fashion-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Contain for product images */
+  transition: transform 0.3s ease;
+}
+
+.fashion-product-card:hover .fashion-image-wrapper img {
+  transform: scale(1.05);
+}
+
+/* Product details below image, like in the image */
+.fashion-product-details {
+  padding: 0;
+}
+
+.fashion-discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #e9d45c, #d4db67);
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.fashion-price-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.fashion-current-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.fashion-old-price {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.fashion-product-title {
+  font-size: 0.9rem;
+  color: #333;
+  margin: 10px 0 5px;
+  line-height: 1.4;
+  font-weight: 500;
+  text-align: center;
+  max-height: 2.8em; /* Limit to 2 lines */
+  overflow: hidden;
+}
+
+/* Beauty Grid Layout - Strictly matches the provided image: 3-column grid with product boxes, model images, and pricing below */
+/* Image heights: 350px for left/right (tall tubes/bottles), 400px for middle (full model body) */
+/* UPDATED: Red badge for discount top-left, "Limited time deal" in red below badge, no line-through on MRP, exact pricing format */
+.beauty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 0 20px;
+  margin: 20px 0;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.beauty-product-card {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.beauty-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.beauty-image-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9f9f9;
+  overflow: hidden;
+  position: relative; /* For absolute positioning of badge and add-btn */
+}
+
+.beauty-left-right-img {
+  height: 350px; /* Taller for product tubes/bottles like left/right in image */
+}
+
+.beauty-model-img-wrapper {
+  height: 400px; /* Even taller for full-body model like middle in image */
+}
+
+.beauty-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Contain for product boxes */
+  transition: transform 0.3s ease;
+}
+
+.beauty-product-card:hover .beauty-image-wrapper img {
+  transform: scale(1.05);
+}
+
+/* Model image specific (middle card in image) */
+.beauty-model-img {
+  object-fit: cover; /* Full coverage for model photos */
+  height: 100%;
+  width: 100%;
+}
+
+/* Product details below image, like in the image */
+.beauty-product-details {
+  padding: 15px;
+}
+
+.beauty-discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ff0000; /* Red background to match image */
+  color: #ffffff; /* White text */
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 4px; /* Rectangular like image */
+  font-weight: bold;
+  z-index: 2;
+}
+
+.beauty-limited-deal {
+  position: absolute;
+  top: 32px; /* Positioned directly below the badge */
+  left: 10px;
+  color: #ff0000; /* Red text to match image style */
+  font-size: 0.7rem;
+  font-weight: bold;
+  z-index: 2;
+  line-height: 1.1;
+}
+
+.beauty-add-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ffd700; /* Solid yellow to match image */
+  color: #000000; /* Black + symbol */
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 2;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+}
+
+.beauty-add-btn:hover {
+  background: #ffc107; /* Slightly darker yellow on hover */
+  transform: scale(1.1);
+}
+
+.beauty-price-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px; /* Tighter gap like image */
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.beauty-current-price {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #000000; /* Black bold for current price */
+}
+
+.beauty-old-price {
+  font-size: 0.95rem;
+  color: #000000; /* Black text for MRP, no line-through */
+  margin-left: 2px;
+}
+
+.beauty-product-title {
+  font-size: 0.9rem;
+  color: #333;
+  margin: 10px 0 5px;
+  line-height: 1.4;
+  font-weight: 500;
+  text-align: center;
+  max-height: 2.8em; /* Limit to 2 lines */
+  overflow: hidden;
+}
+
+/* Updated Premium Section - Now horizontal carousel, professional with light colors */
+.premium-section {
+  padding: 0 20px;
+  margin: 40px 0;
+  background: #fafafa; /* Light gray background for premium distinction */
+}
+
+.premium-section .slick-slider {
+  margin: 0;
+  padding: 0;
+}
+
+.premium-section .slick-track {
+  display: flex !important;
+}
+
+.premium-section .slick-slide > div {
+  height: 100%;
+  padding: 0 10px;
+}
+
+.slick-track {
+  display: flex !important;
+}
+
+.slick-slide > div {
+  height: 100%;
+  padding: 0 10px;
+}
+
+/* Product Cards - Enhanced for professional look: larger images, more spacing, light colors */
+.product-card {
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 240px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.product-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.product-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+}
+
+.product-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Add Button (yellow circle like Amazon) */
+.add-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: #ffd814;
+  color: #111;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.add-btn:hover {
+  background-color: #f7ca00;
+  transform: scale(1.1);
+}
+
+/* Info Section */
+.product-info {
+  padding: 10px 12px 14px;
+  font-family: "Poppins", sans-serif;
+}
+
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.current-price {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.discount-badge {
+  background: #ca3713;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.product-title {
+  font-size: 0.95rem;
+  color: #222;
+  font-weight: 500;
+  margin-top: 8px;
+  line-height: 1.3;
+}
+
+
+.discount-badge {
+  background: linear-gradient(135deg, #e9d45c, #e9d45c);
+}
+
+.add-btn {
+  background: linear-gradient(135deg, #ffe066, #ffd43b);
+}
+
+
+/* Brands Section - Refined grid */
+.brands-section {
+  padding: 0 20px;
+  margin: 40px 0;
+}
+
+.brands-section .brands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 30px;
+  justify-items: center;
+}
+
+.brand-logo {
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.brand-logo:hover {
+  transform: scale(1.05);
+}
+
+.brand-logo img {
+  height: 60px;
+  width: auto;
+  filter: grayscale(100%);
+  transition: filter 0.3s ease;
+}
+
+.brand-logo:hover img {
+  filter: grayscale(0%);
+}
+
+.brand-name {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+/* Loading and Error States */
+.loading, .error {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.2rem;
+  color: #2c3e50;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+.no-products {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .categories-section .categories-grid,
+  .audience-section .audience-grid,
+  .saving-zone,
+  .featured-section,
+  .trending-section,
+  .match-section,
+  .beauty-section,
+  .premium-section,
+  .brands-section,
+  .fashion-section {
+    padding: 0 10px;
+  }
+  
+  .product-image-wrapper {
+    height: 200px; /* Adjust for mobile */
+  }
+  
+  .product-title {
+    font-size: 0.95rem;
+  }
+
+  /* NEW: Responsive for fashion grid */
+  .fashion-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 0 10px;
+  }
+
+  .fashion-image-wrapper {
+    height: 280px;
+  }
+
+  /* Responsive for beauty grid */
+  .beauty-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 0 10px;
+  }
+
+  .beauty-left-right-img,
+  .beauty-model-img-wrapper {
+    height: 250px;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .fashion-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .beauty-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Color Swatches - Small circles with CSS background-color */
+.color-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  border: 1px solid #ddd; /* Optional subtle border for visibility */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.color-circle:hover {
+  transform: scale(1.2);
+}
+
+/* Specific to sections */
+.product-colours-swatches,
+.fashion-colours-swatches,
+.beauty-colours-swatches {
+  margin: 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.amazon-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px 10px;
+  text-align: left;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.amazon-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Image container */
+.amazon-img-wrap {
+  width: 100%;
+  height: 200px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.amazon-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.amazon-card:hover .amazon-img-wrap img {
+  transform: scale(1.05);
+}
+
+/* Deal badges */
+.deal-line {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.deal-badge {
+  background: #b12704;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
+.deal-text {
+  color: #b12704;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+/* Price section */
+.price-line {
+  margin-top: 4px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.deal-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f1111;
+}
+
+.deal-price::first-letter {
+  font-size: 0.8rem; /* smaller ₹ like Amazon */
+  vertical-align: top;
+}
+
+.mrp {
+  font-size: 0.8rem;
+  color: #565959;
+}
+
+.mrp s {
+  color: #565959;
+}
+
+/* Product title */
+.product-title {
+  margin-top: 6px;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  color: #0f1111;
+  max-height: 2.6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Colour dots */
+.colour-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.colour-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+}
+.amazon-img-wrap {
+  height: 240px;
+}
