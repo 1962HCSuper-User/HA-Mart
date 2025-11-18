@@ -66,6 +66,7 @@ function App() {
       <Route path="/product/:id" element={<ProductView />} />
       <Route path="/product-images/:product_id" element={<ProductImages />} />
       <Route path="/list-products" element={<List_Products />} />
+      <Route path="/Testpath" element={<List_Products />} />
 
     </Routes>
   </main>
