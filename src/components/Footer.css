@@ -82,7 +82,7 @@
 }
 
 .newsletter-input button {
-  background: linear-gradient(135deg, #ffb6b6, #ffe4e1);
+  background: linear-gradient(135deg, #fdb6ff, #ffe4e1);
   color: #fff !important; /* White text on gradient */
   border: none;
   border-radius: 12px;
