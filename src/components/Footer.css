@@ -3,8 +3,8 @@
   color: #333 !important;
   font-family: "Poppins", sans-serif;
   padding: 60px 6vw 25px;
-  border-top: 1px solid #ce2323;
-  box-shadow: 0 -3px 10px rgba(23, 22, 22, 0.6);
+  border-top: 1px solid #f3f3f3;
+  box-shadow: 0 -3px 10px rgba(240, 240, 240, 0.6);
   position: relative;
   animation: fadeInUp 0.8s ease-out;
 }
@@ -76,13 +76,13 @@
 }
 
 .newsletter-input input:focus {
-  border-color: #8317e9;
+  border-color: #ffb6c1;
   box-shadow: 0 0 0 3px rgba(255, 182, 193, 0.15);
   transform: scale(1.02);
 }
 
 .newsletter-input button {
-  background: linear-gradient(135deg, #c1b6ff, #1e1918);
+  background: linear-gradient(135deg, #b6ffb6, #ffe4e1);
   color: #fff !important; /* White text on gradient */
   border: none;
   border-radius: 12px;
