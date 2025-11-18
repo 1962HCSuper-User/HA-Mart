@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HA-Mart Git Manager</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      padding: 20px; 
+      max-width: 1000px; 
+      margin: auto; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);  /* ENHANCED: Gradient bg */
+      min-height: 100vh;
+    }
+    h1 { 
+      text-align: center; 
+      color: #1976d2; 
+      animation: fadeInDown 0.5s ease;  /* ENHANCED: Fade-in animation */
+    }
+    .box { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 12px; 
+      margin: 20px 0; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);  /* ENHANCED: Shadows */
+      transition: transform 0.2s ease;  /* ENHANCED: Hover lift */
+    }
+    .box:hover { transform: translateY(-2px); }
+    input, button { 
+      padding: 12px; 
+      margin: 8px 0; 
+      width: 100%; 
+      box-sizing: border-box; 
+      border-radius: 6px; 
+      border: 1px solid #ddd;
+      transition: background 0.3s ease;  /* ENHANCED: Button hover */
+    }
+    button { 
+      cursor: pointer; 
+      background: linear-gradient(135deg, #1976d2, #1565c0); 
+      color: white; 
+      border: none; 
+      font-weight: bold;
+    }
+    button:hover:not(:disabled) { background: linear-gradient(135deg, #1565c0, #0d47a1); transform: scale(1.02); }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    #output { 
+      background: #f8f9fa; 
+      padding: 15px; 
+      border-radius: 8px; 
+      white-space: pre-wrap; 
+      min-height: 40px; 
+      border-left: 4px solid #1976d2;
+      animation: fadeIn 0.3s ease;
+    }
+    #loginModal { 
+      display: none; 
+      position: fixed; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      width: 450px; 
+      background: white; 
+      border: none; 
+      padding: 25px; 
+      border-radius: 12px; 
+      z-index: 1001; 
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);  /* ENHANCED: Modal shadow */
+      animation: modalPop 0.3s ease;
+    }
+    #overlay { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.6); 
+      z-index: 1000; 
+      animation: fadeIn 0.2s ease;
+    }
+    .hidden { display: none; }
+    .progress-container {  /* ENHANCED: Progress bar */
+      width: 100%; 
+      height: 20px; 
+      background: #e0e0e0; 
+      border-radius: 10px; 
+      overflow: hidden; 
+      margin: 10px 0;
+    }
+    #progressBar { 
+      height: 100%; 
+      width: 0%; 
+      background: linear-gradient(90deg, #4caf50, #45a049);  /* Green for clone/pull */
+      transition: width 0.3s ease; 
+    }
+    #uploadProgress { background: linear-gradient(90deg, #2196f3, #0b7dda); }  /* Blue for upload */
+    #progressText { font-size: 14px; color: #666; margin-top: 5px; }
+    .spinner {  /* ENHANCED: CSS spinner */
+      border: 4px solid #f3f3f3; 
+      border-top: 4px solid #1976d2; 
+      border-radius: 50%; 
+      width: 20px; 
+      height: 20px; 
+      animation: spin 1s linear infinite; 
+      display: inline-block; 
+      margin-right: 10px;
+    }
+    #lastUpdated {  /* ENHANCED: Last updated display */
+      font-style: italic; 
+      color: #666; 
+      text-align: center; 
+      margin: 10px 0;
+      padding: 10px; 
+      background: #e8f4fd; 
+      border-radius: 6px;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes modalPop { from { opacity: 0; transform: translate(-50%, -60%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .collabWarning { animation: shake 0.5s ease-in-out; }  /* ENHANCED: Warning shake */
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  </style>
+</head>
+<body>
+
+<h1>HA-Mart Git Manager</h1>
+<p style="text-align: center; color: #666; animation: fadeIn 1s ease;">Professional tool to manage contributions to the HA-Mart React Vite project.</p>
+
+<div id="loginSection" class="box">
+  <h3>🔐 GitHub Login</h3>
+  <p>Login with your GitHub account to download and manage the repository.</p>
+  <button onclick="githubLogin()">Login with GitHub</button>
+</div>
+
+<div id="loggedSection" class="hidden">
+  <div class="box">
+    <p>👋 Logged in as <strong id="username"></strong> <button onclick="logout()" style="width: auto; margin-left: 10px; padding: 5px 10px;">Logout</button></p>
+    <div id="collabWarning" class="hidden collabWarning" style="color: #d32f2f; font-weight: bold; padding: 10px; background: #ffebee; border-radius: 6px;">⚠️ Warning: You are not a collaborator on this repository. Push and upload features are disabled.</div>
+    <button onclick="downloadRepo()">📥 Download HA-Mart Repo</button>
+  </div>
+  <div id="repoSection" class="hidden box">
+    <h3>⚙️ Repository Management</h3>
+    <p>Repo is downloaded. Use the buttons below to manage changes.</p>
+    <div id="lastUpdated"></div>  <!-- ENHANCED: Last updated display -->
+    <div class="progress-container">
+      <div id="progressBar"></div>
+    </div>
+    <div id="progressText"></div>
+    <div class="spinner hidden" id="spinner"></div>
+    <button onclick="checkStatus()">📊 Check Status (See if updated)</button>
+    <button onclick="pullRepo()">🔄 Update (Pull latest from GitHub)</button>
+    <button id="pushBtn" onclick="pushUpdates()">🚀 Sync Changes (Commit & Push to GitHub)</button>
+    <button id="uploadBtn" onclick="uploadFile()">📤 Upload New Files/Folders</button>
+  </div>
+</div>
+
+<pre id="output"></pre>
+
+<!-- Modal for Device Code -->
+<div id="overlay" onclick="closeLoginModal()"></div>
+<div id="loginModal">
+  <h3>🔐 GitHub Authorization</h3>
+  <p>Open <a id="verifyUrl" href="#" target="_blank">GitHub Device Login</a> in your browser.</p>
+  <p>Enter this one-time code: <strong id="userCode"></strong></p>
+  <p>Waiting for you to authorize... (This may take a minute)</p>
+  <button onclick="closeLoginModal()">Cancel</button>
+</div>
+
+<script>
+let authListener;
+
+function showLoginModal(data) {
+  document.getElementById('verifyUrl').href = data.verification_uri;
+  document.getElementById('userCode').textContent = data.user_code;
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('loginModal').style.display = 'block';
+}
+
+function closeLoginModal() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('loginModal').style.display = 'none';
+  authListener = null;
+}
+
+async function githubLogin() {
+  const clientId = 'Ov23li8DREwK66VRCJI4';
+
+  authListener = (event, data) => {
+    closeLoginModal();
+    if (data.success) {
+      document.getElementById('username').textContent = data.username;
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('loggedSection').classList.remove('hidden');
+      if (!data.isCollaborator) {
+        document.getElementById('collabWarning').classList.remove('hidden');
+        document.getElementById('pushBtn').disabled = true;
+        document.getElementById('uploadBtn').disabled = true;
+      }
+      checkRepoExists();
+    } else {
+      document.getElementById('output').textContent = `Login failed: ${data.error}`;
+    }
+  };
+  window.gitAPI.onAuthComplete(authListener);
+
+  window.gitAPI.startGithubLogin(clientId);
+}
+
+async function logout() {
+  await window.gitAPI.clearCreds();
+  location.reload();
+}
+
+async function checkRepoExists() {
+  const exists = await window.gitAPI.repoExists();
+  if (exists) {
+    document.getElementById('repoSection').classList.remove('hidden');
+    updateLastUpdated();  // ENHANCED: Fetch and show last date
+  }
+}
+
+// ENHANCED: Update last updated date
+async function updateLastUpdated() {
+  const res = await window.gitAPI.status();  // Reuse status to get date
+  const dateMatch = res.match(/Last updated: (.*)/);
+  if (dateMatch) {
+    document.getElementById('lastUpdated').innerHTML = `🕒 Last Updated: ${dateMatch[1]}`;
+  }
+}
+
+async function downloadRepo() {
+  showProgress('clone');
+  const res = await window.gitAPI.cloneRepo();
+  document.getElementById('output').textContent = res;
+  if (res.includes('success')) {
+    document.getElementById('repoSection').classList.remove('hidden');
+    updateLastUpdated();
+  }
+  hideProgress();
+}
+
+async function checkStatus() {
+  showSpinner();
+  const res = await window.gitAPI.status();
+  document.getElementById('output').textContent = res;
+  updateLastUpdated();
+  hideSpinner();
+}
+
+async function pullRepo() {
+  showProgress('pull');
+  const res = await window.gitAPI.pullRepo();
+  document.getElementById('output').textContent = res;
+  if (res.includes('success')) {
+    updateLastUpdated();
+  }
+  hideProgress();
+}
+
+async function pushUpdates() {
+  showProgress('push');
+  const res = await window.gitAPI.pushUpdates();
+  document.getElementById('output').textContent = res;
+  hideProgress();
+}
+
+async function uploadFile() {
+  showProgress('upload');
+  const res = await window.gitAPI.uploadFile();
+  document.getElementById('output').textContent = res;
+  hideProgress();
+}
+
+// ENHANCED: Progress handlers
+function showProgress(type) {
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressBar').className = type === 'upload' ? 'uploadProgress' : '';
+  document.getElementById('progressText').textContent = 'Starting...';
+  document.getElementById('progressText').style.display = 'block';
+  document.querySelector('.progress-container').style.display = 'block';
+}
+
+function hideProgress() {
+  document.querySelector('.progress-container').style.display = 'none';
+  document.getElementById('progressText').style.display = 'none';
+}
+
+function showSpinner() {
+  document.getElementById('spinner').classList.remove('hidden');
+}
+
+function hideSpinner() {
+  document.getElementById('spinner').classList.add('hidden');
+}
+
+// Listen for progress updates
+window.gitAPI.onProgress((event, data) => {
+  const bar = document.getElementById('progressBar');
+  bar.style.width = `${data.percent}%`;
+  document.getElementById('progressText').textContent = `${data.phase} (${data.percent}%)`;
+});
+
+// Auto-load on start (ENHANCED: Handle expired token)
+window.onload = async () => {
+  const creds = await window.gitAPI.loadCreds();
+  if (creds) {
+    const valid = await window.gitAPI.validateToken(creds.token);
+    if (valid.valid) {
+      document.getElementById('username').textContent = valid.username;
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('loggedSection').classList.remove('hidden');
+      if (!creds.isCollaborator) {
+        document.getElementById('collabWarning').classList.remove('hidden');
+        document.getElementById('pushBtn').disabled = true;
+        document.getElementById('uploadBtn').disabled = true;
+      }
+      checkRepoExists();
+    } else if (valid.expired) {
+      document.getElementById('output').textContent = 'Token expired. Please re-login.';
+      await window.gitAPI.clearCreds();
+    } else {
+      await window.gitAPI.clearCreds();
+    }
+  }
+  window.gitAPI.onDeviceCode((event, data) => {
+    showLoginModal(data);
+  });
+};
+</script>
+
+</body>
+</html>
