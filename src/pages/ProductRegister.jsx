@@ -13,11 +13,11 @@ const ProductRegister = () => {
     formState: { errors },
   } = useForm();
 
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const watchedImage = watch("image");
+  const watchedImages = watch("images");
   const basePrice = watch("base_price");
   const discount = watch("discount");
   const discountedPrice =
@@ -25,16 +25,22 @@ const ProductRegister = () => {
       ? (basePrice - (basePrice * discount) / 100).toFixed(2)
       : basePrice;
 
-  // 🔹 Image preview
+  // 🔹 Multiple image previews
   useEffect(() => {
-    if (watchedImage && watchedImage[0]) {
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result);
-      reader.readAsDataURL(watchedImage[0]);
-    } else {
-      setImagePreview(null);
+    setImagePreviews([]);
+    if (watchedImages) {
+      const files = Array.from(watchedImages);
+      files.forEach((file) => {
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImagePreviews(prev => [...prev, reader.result]);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
     }
-  }, [watchedImage]);
+  }, [watchedImages]);
 
   // ✅ Submit handler
   const onSubmit = async (data) => {
@@ -61,8 +67,12 @@ const ProductRegister = () => {
     formData.append("discount", data.discount || 0);
     formData.append("category_id", data.category_id);
     formData.append("colours", JSON.stringify(coloursArray));
-    if (data.image && data.image[0]) {
-      formData.append("image", data.image[0]);
+    
+    // Append multiple images
+    if (data.images && data.images.length > 0) {
+      Array.from(data.images).forEach((image) => {
+        formData.append("images", image);
+      });
     }
 
     try {
@@ -78,7 +88,7 @@ const ProductRegister = () => {
       if (response.ok) {
         setMessage(`✅ Product registered successfully! ID: ${result.product_id}`);
         reset();
-        setImagePreview(null);
+        setImagePreviews([]);
         navigate(`/product-details/${result.product_id}`);
       } else {
         setMessage(`❌ Error: ${result.error || "Failed to register product"}`);
@@ -167,10 +177,19 @@ const ProductRegister = () => {
             {...register("colours")}
           />
 
-          {/* Image */}
-          <input type="file" accept="image/*" {...register("image")} />
-          {imagePreview && (
-            <img src={imagePreview} alt="Preview" className="image-preview" />
+          {/* Images */}
+          <input type="file" accept="image/*" multiple {...register("images")} />
+          {imagePreviews.length > 0 && (
+            <div className="image-previews">
+              {imagePreviews.map((preview, index) => (
+                <img
+                  key={index}
+                  src={preview}
+                  alt={`Preview ${index + 1}`}
+                  className="image-preview"
+                />
+              ))}
+            </div>
           )}
 
           <button type="submit" disabled={loading}>

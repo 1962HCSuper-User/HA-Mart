@@ -1,0 +1,1 @@
+["Cotton", "Polyester", "Silk", "Wool", "Denim", "Linen", "Nylon", "Leather"]

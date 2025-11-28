@@ -1,49 +1,371 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "./ProductView.css";
+import ProductCardLinear from "../ProductCard_Linear";
+import ProductCard_BigDiv from "../Big_PoductCard";
+import BuyWith from "../BuyWith";
 
 export default function ProductPage() {
+  const { id } = useParams(); // Get product_id from route, e.g., /product/:id
+  const navigate = useNavigate();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [cartMessage, setCartMessage] = useState(""); // NEW: For success/error messages
+
+  // 🔹 NEW: Copied from Home.jsx for image URL building and parsing
+  const safeParseJsonOrCsv = (value, isCsvFallback = true) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    let strValue = typeof value === 'string' ? value : String(value);
+    try {
+      const parsed = JSON.parse(strValue);
+      if (Array.isArray(parsed)) return parsed;
+      return [];
+    } catch (parseErr) {
+      console.warn("JSON parse failed for field, falling back to CSV split:", parseErr, strValue);
+      if (isCsvFallback) {
+        return strValue.split(',').map(item => item.trim()).filter(item => item.length > 0);
+      }
+      return [];
+    }
+  };
+
+  const API_BASE_URL = "http://localhost:1100";
+  const PLACEHOLDER_IMAGE = "https://via.placeholder.com/600?text=No+Image";
+
+  const fixMojibake = (str) => {
+    return str
+      .replace(/â€™/g, "’")
+      .replace(/â'/g, "’")
+      .replace(/â€˜/g, "‘")
+      .replace(/â€œ/g, "“")
+      .replace(/â€/g, "”")
+      .replace(/â—/g, "—");
+  };
+
+  const buildAbsoluteUrl = (relativePath, encodeFilename = true) => {
+    if (!relativePath) return null;
+    let normalized = String(relativePath)
+      .replace(/\\/g, "/")
+      .replace(/^uploads\//i, "")
+      .replace(/^\/+/, "");
+
+    normalized = fixMojibake(normalized);
+
+    console.log(`Normalized filename (after mojibake fix): ${normalized}`);
+
+    if (encodeFilename) {
+      const parts = normalized.split("/");
+      if (parts.length > 0) {
+        parts[parts.length - 1] = encodeURIComponent(parts[parts.length - 1]);
+        normalized = parts.join("/");
+      }
+    }
+
+    const fullUrl = `${API_BASE_URL}/uploads/${normalized}`;
+    console.log(`Built image URL: ${fullUrl}`);
+    return fullUrl;
+  };
+
+  const getProductImageCandidates = (product) => {
+    const pickFirst = (input) => {
+      if (!input) return null;
+      if (Array.isArray(input)) {
+        const first = input[0];
+        if (typeof first === "string") return first;
+        if (first && typeof first === "object") return first.image_path || first.url;
+        return null;
+      }
+      if (typeof input === "object") return input.image_path || input.url;
+      return input;
+    };
+
+    let imagePaths = product.image_paths || [];
+    if (!Array.isArray(imagePaths) || imagePaths.length === 0) {
+      imagePaths = product.image_path ? [product.image_path] : [];  // 🔹 NEW: Fallback if no array
+    }
+
+    const rawCandidates = [
+      pickFirst(imagePaths),
+      pickFirst(product.images),
+      product.mainImage?.image_path,
+    ].filter(Boolean);
+
+    if (rawCandidates.length === 0) return [PLACEHOLDER_IMAGE];
+
+    const variants = rawCandidates
+      .map((rawPath) => buildAbsoluteUrl(rawPath))
+      .filter(Boolean);
+
+    const unique = Array.from(new Set(variants));
+    console.log(`Image candidates for ${product.name}:`, unique);
+    return unique.length > 0 ? unique : [PLACEHOLDER_IMAGE];
+  };
+
+  const handleImageError = (event) => {
+    const imgUrl = event.target.src;
+    console.error(`Image failed to load: ${imgUrl}`);
+
+    try {
+      const fallbacks = JSON.parse(event.target.dataset.fallbacks || "[]");
+      if (fallbacks.length > 0) {
+        const nextSrc = fallbacks.shift();
+        event.target.dataset.fallbacks = JSON.stringify(fallbacks);
+        event.target.src = nextSrc;
+        console.log(`Trying fallback: ${nextSrc}`);
+      } else {
+        event.target.onerror = null;
+        event.target.src = PLACEHOLDER_IMAGE;
+        console.log(`All fallbacks exhausted, using placeholder`);
+      }
+    } catch (e) {
+      console.error("Fallback parsing error:", e);
+      event.target.onerror = null;
+      event.target.src = PLACEHOLDER_IMAGE;
+    }
+  };
+
+  // NEW: Add to Cart function
+  const addToCart = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setCartMessage("Please log in to add to cart");
+      setTimeout(() => setCartMessage(""), 3000);
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ product_id: id }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setCartMessage(`Added to cart! (${result.cart_size} items)`);
+        setTimeout(() => setCartMessage(""), 3000);
+      } else {
+        setCartMessage(result.error || "Failed to add to cart");
+        setTimeout(() => setCartMessage(""), 3000);
+      }
+    } catch (err) {
+      console.error("Add to cart error:", err);
+      setCartMessage("Network error adding to cart");
+      setTimeout(() => setCartMessage(""), 3000);
+    }
+  };
+
+  // NEW: Buy Now function - Add to cart and redirect to checkout
+  const buyNow = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setCartMessage("Please log in to buy");
+      setTimeout(() => setCartMessage(""), 3000);
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ product_id: id }),
+      });
+
+      if (response.ok) {
+        // Redirect to checkout with product_id in query params
+        navigate(`/checkout?product=${id}`);
+      } else {
+        const result = await response.json();
+        setCartMessage(result.error || "Failed to add to cart");
+        setTimeout(() => setCartMessage(""), 3000);
+      }
+    } catch (err) {
+      console.error("Buy now error:", err);
+      setCartMessage("Network error");
+      setTimeout(() => setCartMessage(""), 3000);
+    }
+  };
+
+  // Fetch product data - UPDATED: Parse JSON fields + ensure numeric fields
+  useEffect(() => {
+    if (!id) {
+      setError("Product ID is required");
+      setLoading(false);
+      return;
+    }
+
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`http://localhost:1100/api/products/${id}`);
+        const result = await response.json();
+
+        if (response.ok) {
+          const parsedProduct = {
+            ...result.product,
+            // 🔹 FIXED: Safe parse for tags/colours (backend already does, but double-check)
+            tags: safeParseJsonOrCsv(result.product.tags || "[]", false),
+            colours: safeParseJsonOrCsv(result.product.colours || "[]", true),
+            image_paths: safeParseJsonOrCsv(result.product.image_paths || "[]", false),  // 🔹 NEW: Ensure array
+            // 🔹 FIXED: Ensure numeric fields for toFixed safety
+            base_price: parseFloat(result.product.base_price) || 0,
+            discount: parseFloat(result.product.discount) || 0,
+            total_amt_after_discount: parseFloat(result.product.total_amt_after_discount) || 0,
+          };
+          // 🔹 NEW: Log image candidates
+          console.log("Sample image candidates:", getProductImageCandidates(parsedProduct));
+          setProduct(parsedProduct);
+        } else {
+          setError(result.error || "Failed to load product");
+        }
+      } catch (err) {
+        setError("Network error: " + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  // Static data for sections (unchanged, but can fetch dynamically later)
+  const bigCardProducts = [
+    {
+      name: "Nervfit Orion S1 Smartwatch",
+      image: "https://via.placeholder.com/300?text=Premium+Watch",
+      rating: 4.4,
+      ratingCount: 3350,
+      discount: 48,
+      price: 2249,
+      mrp: 4299,
+      deliveryDate: "Wednesday, 27 Nov",
+    },
+    {
+      name: "Fire-Boltt Phoenix Smartwatch",
+      image: "https://via.placeholder.com/300?text=Phoenix",
+      rating: 4.1,
+      ratingCount: 2100,
+      discount: 52,
+      price: 1999,
+      mrp: 4199,
+      deliveryDate: "Thursday, 28 Nov",
+    },
+  ];
+
+  const linearProducts = [
+    {
+      name: "boAt Wave Call 2 Smartwatch 1.83” Display",
+      image: "https://via.placeholder.com/250?text=boAt+Wave",
+      rating: 4.2,
+      ratingCount: 1200,
+      badge: "Deal of the Day",
+      discount: 55,
+      price: 1599,
+      mrp: 3499,
+    },
+    {
+      name: "Noise Pulse 2 Max Smartwatch 1.85” Display",
+      image: "https://via.placeholder.com/250?text=Noise+Pulse",
+      rating: 4.3,
+      ratingCount: 950,
+      badge: "Bestseller",
+      discount: 50,
+      price: 1499,
+      mrp: 2999,
+    },
+    {
+      name: "Amazfit Bip 5 Unity Smartwatch",
+      image: "https://via.placeholder.com/250?text=Amazfit+Bip",
+      rating: 4.5,
+      ratingCount: 1425,
+      badge: "New launch",
+      discount: 40,
+      price: 4999,
+      mrp: 8299,
+    },
+  ];
+
+  if (loading) {
+    return <div className="page-wrapper">Loading product...</div>;
+  }
+
+  if (error || !product) {
+    return (
+      <div className="page-wrapper">
+        <div className="error-message">{error || "Product not found"}</div>
+        <button onClick={() => navigate(-1)}>Go Back</button>
+      </div>
+    );
+  }
+
+  // Calculate discount percentage - UPDATED: Use parsed numbers
+  const discountPercent = Math.round(((product.base_price - product.total_amt_after_discount) / product.base_price) * 100);
+
+  const imageCandidates = getProductImageCandidates(product);
+  const [primaryImage, ...fallbackImages] = imageCandidates;
+
   return (
     <div className="page-wrapper">
+      {/* NEW: Cart message display */}
+      {cartMessage && (
+        <div className="cart-message">{cartMessage}</div>
+      )}
+
       {/* MAIN CONTAINER */}
       <div className="page-container">
         
-        {/* LEFT SIDE IMAGES */}
+        {/* LEFT SIDE IMAGES - UPDATED: Use buildAbsoluteUrl + fallbacks */}
         <div>
           <div className="thumb-list">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="thumb-item">
-                <img
-                  src={`https://via.placeholder.com/200?text=Img+${i}`}
-                  alt="thumb"
-                />
-              </div>
-            ))}
+            {product.image_paths.slice(1).map((imgPath, i) => {
+              const thumbUrl = buildAbsoluteUrl(imgPath);
+              return (
+                <div key={i} className="thumb-item">
+                  <img
+                    src={thumbUrl}
+                    data-fallbacks={JSON.stringify(fallbackImages)}  // 🔹 NEW: Fallbacks
+                    alt={`thumb ${i + 1}`}
+                    onError={handleImageError}
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
           </div>
-          {/* MAIN IMAGE */}
+          {/* MAIN IMAGE - UPDATED */}
           <div className="main-image">
             <img
-              src="https://via.placeholder.com/600?text=Main+Product"
-              alt="main"
+              src={primaryImage}
+              data-fallbacks={JSON.stringify(fallbackImages)}
+              alt={product.name}
+              onError={handleImageError}
+              loading="lazy"
             />
           </div>
         </div>
-        {/* PRODUCT DETAILS */}
+        {/* PRODUCT DETAILS - UPDATED: Use parsed colours/tags */}
         <div>
-          <h1 className="product-title">
-            Nervfit Orion S1 Smartwatch 1.43" AMOLED Display with AOD, Functional Crown,
-            Bluetooth Calling, AI Voice, IP68 Waterproof, Heart Rate & SpO2 Monitor
-          </h1>
+          <h1 className="product-title">{product.title || product.name}</h1>
           <div className="rating-box">
             <span className="rating-stars">★★★★☆</span>
             <span className="rating-link">3 ratings</span>
             <span className="amz-choice">Amazon's Choice</span>
           </div>
           <div className="price-section">
-            <span className="price">-88% ₹2,249</span>
-            <span className="mrp">₹17,999</span>
+            <span className="price">-{discountPercent}% ₹{product.total_amt_after_discount.toFixed(2)}</span>
+            <span className="mrp">₹{product.base_price.toFixed(2)}</span>
             <p>Inclusive of all taxes</p>
           </div>
-          {/* Offers */}
+          {/* Offers - Static for now */}
           <div className="offer-box">
             <h2 className="offer-title">Offers</h2>
             <div className="offer-grid">
@@ -62,16 +384,16 @@ export default function ProductPage() {
             </div>
           </div>
         </div>
-        {/* BUY BOX */}
+        {/* BUY BOX - UPDATED: Add onClick handlers */}
         <div className="buy-box">
-          <p className="buy-price">₹2,249.00</p>
-          <p className="buy-mrp">₹17,999.00</p>
+          <p className="buy-price">₹{product.total_amt_after_discount.toFixed(2)}</p>
+          <p className="buy-mrp">₹{product.base_price.toFixed(2)}</p>
           <p>FREE Delivery Tomorrow</p>
-          <button className="buy-btn add-cart">Add to Cart</button>
-          <button className="buy-btn buy-now">Buy Now</button>
+          <button className="buy-btn add-cart" onClick={addToCart}>Add to Cart</button>
+          <button className="buy-btn buy-now" onClick={buyNow}>Buy Now</button>
           <div className="buy-info">
             <p><b>Ships from:</b> Amazon</p>
-            <p><b>Sold by:</b> Bluemorph Brands</p>
+            <p><b>Sold by:</b> {product.seller_name || 'Seller'}</p>
             <p><b>Payment:</b> Secure transaction</p>
           </div>
         </div>
@@ -80,22 +402,49 @@ export default function ProductPage() {
       {/* OFFER BADGE AND PRICE SUMMARY (MOVED FROM BOTTOM) */}
       <div className="offer-badge">Limited Time Deal</div>
       <div className="price-summary">
-        <span className="price">₹999</span>
-        <span className="mrp">₹2490</span>
+        <span className="price">₹{product.total_amt_after_discount.toFixed(2)}</span>
+        <span className="mrp">₹{product.base_price.toFixed(2)}</span>
       </div>
-      <div className="discount-text">60% off</div>
+      <div className="discount-text">{discountPercent}% off</div>
       <div className="label">Inclusive of all taxes</div>
+
+      {/* INTEGRATED SECTIONS */}
+      <div className="full-width-section">
+        <div className="section">
+          <h2 className="section-title">Featured limited-time deals</h2>
+          <div className="big-card-grid">
+            {bigCardProducts.map((p, idx) => (
+              <ProductCard_BigDiv key={idx} product={p} />
+            ))}
+          </div>
+        </div>
+
+        <BuyWith />
+
+        <div className="section">
+          <h2 className="section-title">Recommended {product.type}s</h2>
+          <div className="linear-card-list">
+            {linearProducts.map((p, idx) => (
+              <ProductCardLinear key={idx} product={p} />
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* FULL-WIDTH SECTIONS BELOW MAIN GRID */}
       <div className="full-width-section">
-        {/* FREQUENTLY BOUGHT TOGETHER */}
+        {/* FREQUENTLY BOUGHT TOGETHER - UPDATED: Use buildAbsoluteUrl */}
         <div className="section">
           <h2 className="section-title">Frequently bought together</h2>
           <div className="bundle-grid">
             <div className="bundle-item">
-              <img src="https://via.placeholder.com/150?text=Product+1" alt="Bundle 1" />
-              <p>Nervfit Orion S1 Smartwatch</p>
-              <span className="bundle-price">₹2,249</span>
+              <img 
+                src={primaryImage} 
+                alt={product.name} 
+                onError={handleImageError}
+              />
+              <p>{product.name}</p>
+              <span className="bundle-price">₹{product.total_amt_after_discount.toFixed(2)}</span>
             </div>
             <div className="bundle-item plus">+</div>
             <div className="bundle-item">
@@ -110,11 +459,11 @@ export default function ProductPage() {
               <span className="bundle-price">₹199</span>
             </div>
           </div>
-          <p className="bundle-total">Total: ₹2,747 <span className="save-text">(Save ₹150)</span></p>
+          <p className="bundle-total">Total: ₹{/* Calculate dynamically */} <span className="save-text">(Save ₹150)</span></p>
           <button className="bundle-btn">Add these 3 items to cart</button>
         </div>
 
-        {/* WHAT DO CUSTOMERS BUY AFTER VIEWING THIS ITEM? */}
+        {/* WHAT DO CUSTOMERS BUY AFTER VIEWING THIS ITEM? - Static */}
         <div className="section">
           <h2 className="section-title">What do customers buy after viewing this item?</h2>
           <div className="product-grid">
@@ -128,23 +477,23 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* WHAT'S IN THE BOX */}
+        {/* WHAT'S IN THE BOX - Static */}
         <div className="section">
           <h2 className="section-title">What's in the box?</h2>
           <ul className="box-list">
-            <li>Smartwatch</li>
+            <li>{product.name}</li>
             <li>Charging Cable</li>
             <li>User Manual</li>
             <li>Warranty Card</li>
           </ul>
         </div>
 
-        {/* BANNER/ADVERTISEMENTS */}
+        {/* BANNER/ADVERTISEMENTS - Static */}
         <div className="banner-section">
           <img src="https://via.placeholder.com/1200x200?text=Advertisement+Banner" alt="Ad Banner" />
         </div>
 
-        {/* PRODUCT INFORMATION */}
+        {/* PRODUCT INFORMATION - Dynamic where possible - UPDATED: Use parsed data */}
         <div className="section">
           <h2 className="section-title">Product information</h2>
           <table className="info-table">
@@ -156,39 +505,47 @@ export default function ProductPage() {
             </thead>
             <tbody>
               <tr>
-                <td>Brand: Nervfit</td>
-                <td>ASIN: B0ABC123</td>
+                <td>Type: {product.type}</td>
+                <td>Category ID: {product.category_id || 'N/A'}</td>
               </tr>
               <tr>
-                <td>Display: 1.43" AMOLED</td>
-                <td>Weight: 45g</td>
+                <td>Colors: {product.colours.join(', ')}</td>  {/* 🔹 UPDATED: Parsed */}
+                <td>Tags: {product.tags.join(', ')}</td>  {/* 🔹 UPDATED: Parsed */}
               </tr>
               <tr>
-                <td>Battery: 300mAh</td>
-                <td>Dimensions: 45x45x12mm</td>
+                <td>Base Price: ₹{product.base_price.toFixed(2)}</td>
+                <td>Discount: {product.discount.toFixed(2)}%</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* PRODUCT DESCRIPTION */}
+        {/* PRODUCT DESCRIPTION - UPDATED: Use buildAbsoluteUrl for images */}
         <div className="section">
           <h2 className="section-title">Product description</h2>
           <p className="description-text">
-            The Nervfit Orion S1 Smartwatch features a stunning 1.43" AMOLED display with Always-On Display (AOD) for easy viewing. 
-            Enjoy seamless Bluetooth calling, AI voice assistance, and IP68 waterproof rating. Monitor your heart rate and SpO2 levels effortlessly.
+            {product.description || `Discover the ${product.name}. A premium ${product.type} with exceptional quality.`}
           </p>
           <div className="description-images">
-            {[1, 2, 3].map((i) => (
-              <img key={i} src={`https://via.placeholder.com/300?text=Desc+Img+${i}`} alt={`Desc ${i}`} />
-            ))}
+            {product.image_paths.slice(1, 4).map((imgPath, i) => {
+              const descUrl = buildAbsoluteUrl(imgPath);
+              return (
+                <img
+                  key={i}
+                  src={descUrl}
+                  alt={`Desc ${i + 1}`}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                  loading="lazy"
+                />
+              );
+            })}
           </div>
         </div>
 
-        {/* ADDITIONAL INFORMATION & FEEDBACK */}
+        {/* ADDITIONAL INFORMATION & FEEDBACK - Static */}
         <div className="section">
           <h2 className="section-title">Additional Information</h2>
-          <p>Manufacturer: Nervfit Tech, Country of Origin: India</p>
+          <p>Manufacturer: {product.seller_name || 'Unknown'}, Country of Origin: India</p>
           <div className="feedback">
             <h3>Feedback</h3>
             <p>What do you feel about us? Share your thoughts!</p>
@@ -197,7 +554,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* CUSTOMERS WHO BOUGHT THIS ALSO BOUGHT */}
+        {/* CUSTOMERS WHO BOUGHT THIS ALSO BOUGHT - Static */}
         <div className="section">
           <h2 className="section-title">Customers who bought this item also bought</h2>
           <div className="product-grid">
@@ -211,7 +568,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* PRODUCTS RELATED TO THIS ITEM */}
+        {/* PRODUCTS RELATED TO THIS ITEM - Static */}
         <div className="section">
           <h2 className="section-title">Products related to this item</h2>
           <div className="product-grid">
@@ -225,7 +582,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* SIMILAR BRANDS */}
+        {/* SIMILAR BRANDS - Static */}
         <div className="section">
           <h2 className="section-title">Similar Brands</h2>
           <div className="brand-grid">
@@ -238,12 +595,12 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* CUSTOMER REVIEWS */}
+        {/* CUSTOMER REVIEWS - Static - UPDATED: Dynamic type */}
         <div className="section">
           <h2 className="section-title">Customer reviews</h2>
           <div className="reviews-subsection">
             <h3>Customers say</h3>
-            <p>Most positive review: Great watch!</p>
+            <p>Most positive review: Great {product.type}!</p>  {/* 🔹 UPDATED */}
           </div>
           <div className="reviews-subsection">
             <h3>Review this product</h3>
@@ -271,7 +628,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* ADDITIONAL ITEMS TO EXPLORE */}
+        {/* ADDITIONAL ITEMS TO EXPLORE - Static */}
         <div className="section">
           <h2 className="section-title">Additional items to explore</h2>
           <p>See more</p>
@@ -286,7 +643,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* MORE ITEMS TO CONSIDER */}
+        {/* MORE ITEMS TO CONSIDER - Static */}
         <div className="section">
           <h2 className="section-title">More items to consider</h2>
           <p>See more</p>
@@ -301,7 +658,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* SEE PERSONALIZED RECOMMENDATIONS */}
+        {/* SEE PERSONALIZED RECOMMENDATIONS - Static */}
         <div className="section">
           <h2 className="section-title">See personalized recommendations</h2>
           <div className="product-grid">

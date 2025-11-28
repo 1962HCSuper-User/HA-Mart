@@ -1,0 +1,108 @@
+/* WalletCreate.css */
+.wallet-page {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.balance-card {
+  background: #e8f5e8;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #4CAF50;
+}
+
+.topup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.topup-form label {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font-weight: bold;
+}
+
+.topup-form input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.topup-form button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.topup-form button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.message {
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.message:success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.back-btn {
+  background: #ff9900;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.qr-btn {
+  margin-top: 10px;
+  padding: 10px;
+  background: #4527a0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.qr-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.qr-img {
+  width: 220px;
+  height: 220px;
+}

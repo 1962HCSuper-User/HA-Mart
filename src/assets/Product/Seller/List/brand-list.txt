@@ -1,0 +1,1 @@
+["Nike", "Adidas", "Zara", "H&M", "Gucci", "Levi's", "Puma", "Uniqlo"]

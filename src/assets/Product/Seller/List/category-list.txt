@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Clothing",
+    "sub": [
+      {
+        "name": "Men",
+        "sub": [
+          { "name": "T-Shirts" },
+          { "name": "Jeans" },
+          { "name": "Shirts" }
+        ]
+      },
+      {
+        "name": "Women",
+        "sub": [
+          { "name": "Dresses" },
+          { "name": "Tops" },
+          { "name": "Skirts" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Accessories",
+    "sub": [
+      { "name": "Bags" },
+      { "name": "Watches" }
+    ]
+  }
+]

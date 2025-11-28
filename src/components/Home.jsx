@@ -1,8 +1,11 @@
-// Updated Home.jsx - Unified Amazon-style cards for professional look
-// Removed duplicates, unprofessional divs; All sections now use renderAmazonStyleCard for consistency
-// Added "Based on your browsing history" section matching screenshot
+// Updated Home.jsx - Enhanced mojibake fix to handle straight quote mojibake (â' -> ’)
+// Added more common replacements for full UTF-8 recovery
+// Also added a fallback to use non-encoded URL for testing (toggle encodeFilename = false to test)
+// FIXED: Loosened tag filtering for clothing/beauty to match sample data (e.g., "Shirt" -> "cloth" or "shirt")
+// ADDED: Robust product_id validation in render to prevent invalid links causing 400 errors on click
+// ADDED: Better error display with retry button for fetch failures
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import "./Home.css";
@@ -43,11 +46,110 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const API_BASE_URL = "http://localhost:1100";
+  const PLACEHOLDER_IMAGE = "https://picsum.photos/300?product"; // Or use a local asset: import placeholder from "../assets/placeholder.jpg";
 
-  const fetchProducts = async () => {
+  // UPDATED: Enhanced mojibake fixes - Handle both curly and straight quote variants
+  const fixMojibake = (str) => {
+    return str
+      // Right single quote ’ (U+2019) mojibake: â€™ or â'
+      .replace(/â€™/g, "’")
+      .replace(/â'/g, "’") // NEW: Straight quote variant
+      // Left single quote ‘ (U+2018) : â€˜
+      .replace(/â€˜/g, "‘")
+      // Left double “ (U+201C) : â€œ
+      .replace(/â€œ/g, "“")
+      // Right double ” (U+201D) : â€
+      .replace(/â€/g, "”") // Simplified for common case
+      // Em dash — (U+2014) : â€”
+      .replace(/â€”/g, "—");
+  };
+
+  // UPDATED: Fixed URL building - Apply mojibake fix more robustly
+  const buildAbsoluteUrl = (relativePath, encodeFilename = true) => {
+    if (!relativePath) return null;
+    let normalized = String(relativePath)
+      .replace(/\\/g, "/") // Normalize Windows backslashes
+      .replace(/^uploads\//i, "") // Strip leading "uploads/" (case-insensitive) to avoid double prefix
+      .replace(/^\/+/, ""); // Remove any remaining leading slashes
+
+    // UPDATED: Apply mojibake fix
+    normalized = fixMojibake(normalized);
+
+    console.log(`Normalized filename (after mojibake fix): ${normalized}`); // Debug log for fixed name
+
+    if (encodeFilename) {
+      // Encode only the filename part for safety
+      const parts = normalized.split("/");
+      if (parts.length > 0) {
+        parts[parts.length - 1] = encodeURIComponent(parts[parts.length - 1]);
+        normalized = parts.join("/");
+      }
+    }
+
+    const fullUrl = `${API_BASE_URL}/uploads/${normalized}`;
+    console.log(`Built image URL: ${fullUrl}`); // Debug: Log built URLs
+    return fullUrl;
+  };
+
+  const getProductImageCandidates = (product) => {
+    const pickFirst = (input) => {
+      if (!input) return null;
+      if (Array.isArray(input)) {
+        const first = input[0];
+        if (typeof first === "string") return first;
+        if (first && typeof first === "object") return first.image_path || first.url;
+        return null;
+      }
+      if (typeof input === "object") return input.image_path || input.url;
+      return input;
+    };
+
+    // UPDATED: Prioritize image_path first (from your logs, it's the main field)
+    const rawCandidates = [
+      product.image_path, // NEW: Prioritize this
+      pickFirst(product.images),
+      pickFirst(product.image_paths && safeParseJsonOrCsv(product.image_paths)),
+      product.mainImage?.image_path,
+    ].filter(Boolean);
+
+    if (rawCandidates.length === 0) return [PLACEHOLDER_IMAGE];
+
+    // UPDATED: Build variants with fixed URL logic
+    const variants = rawCandidates
+      .map((rawPath) => buildAbsoluteUrl(rawPath))
+      .filter(Boolean);
+
+    const unique = Array.from(new Set(variants));
+    console.log(`Image candidates for ${product.name}:`, unique); // NEW: Debug log
+    return unique.length > 0 ? unique : [PLACEHOLDER_IMAGE];
+  };
+
+  // UPDATED: Enhanced error handling with logging
+  const handleImageError = (event) => {
+    const imgUrl = event.target.src;
+    console.error(`Image failed to load: ${imgUrl}`); // NEW: Log failed URL for debugging
+
+    try {
+      const fallbacks = JSON.parse(event.target.dataset.fallbacks || "[]");
+      if (fallbacks.length > 0) {
+        const nextSrc = fallbacks.shift();
+        event.target.dataset.fallbacks = JSON.stringify(fallbacks);
+        event.target.src = nextSrc;
+        console.log(`Trying fallback: ${nextSrc}`);
+      } else {
+        event.target.onerror = null;
+        event.target.src = PLACEHOLDER_IMAGE;
+        console.log(`All fallbacks exhausted, using placeholder`);
+      }
+    } catch (e) {
+      console.error("Fallback parsing error:", e);
+      event.target.onerror = null;
+      event.target.src = PLACEHOLDER_IMAGE;
+    }
+  };
+
+  const fetchProducts = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:1100/api/products/all");
       console.log("Response status:", response.status);
@@ -57,8 +159,14 @@ const Home = () => {
         const parsedProducts = (result.products || []).map(product => ({
           ...product,
           colours: safeParseJsonOrCsv(product.colours || "[]", true),
-          tags: safeParseJsonOrCsv(product.tags || "[]", false)
+          tags: safeParseJsonOrCsv(product.tags || "[]", false),
+          images: safeParseJsonOrCsv(product.images || "[]", false),
+          image_paths: safeParseJsonOrCsv(product.image_paths || "[]", false),
         }));
+        // NEW: Log first product's image candidates for debug
+        if (parsedProducts.length > 0) {
+          console.log("Sample image candidates:", getProductImageCandidates(parsedProducts[0]));
+        }
         setProducts(parsedProducts);
         setError("");
       } else {
@@ -70,7 +178,18 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // NEW: Retry function for error state
+  const retryFetch = () => {
+    setLoading(true);
+    setError("");
+    fetchProducts();
   };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Banner settings
   const bannerSettings = {
@@ -122,10 +241,14 @@ const Home = () => {
   const trendingProducts = products.slice(10, 18);
   const matchForYou = products.slice(18, 26);
 
-  // Grid products (fashion/beauty)
+  // Grid products (fashion/beauty) - FIXED: Loosened tag matching to handle sample data like ["Shirt"] -> "cloth" or "shirt"
   const topClothingProducts = products.filter((p) => 
     (p.category_name || "").toLowerCase().includes("clothing") || 
-    (p.tags && p.tags.some(tag => tag.toLowerCase().includes("clothing")))
+    (p.tags && p.tags.some(tag => 
+      tag.toLowerCase().includes("cloth") || 
+      tag.toLowerCase().includes("shirt") ||
+      tag.toLowerCase().includes("clothing")
+    ))
   ).slice(0, 4); // Increased to 4 for better grid
   const topBeautyProducts = products.filter((p) => 
     (p.category_name || "").toLowerCase().includes("beauty") || 
@@ -167,7 +290,14 @@ const Home = () => {
 
   // UPDATED: Unified renderAmazonStyleCard - Professional Amazon-like card matching screenshots
   // Features: Image, deal badge + text, pricing with MRP strike, title, color dots, ratings
+  // FIXED: Added product_id validation to prevent invalid links
   const renderAmazonStyleCard = (product) => {
+    // NEW: Validate product_id to avoid linking to invalid IDs
+    if (!product.product_id || isNaN(parseInt(product.product_id))) {
+      console.warn("Skipping invalid product_id in card:", product);
+      return null;
+    }
+
     const priceAfterDiscount = Number(product.total_amt_after_discount || 0);
     const mrp = Number(product.base_price || 0);
     const discount = Number(product.discount || 0);
@@ -175,14 +305,19 @@ const Home = () => {
     const rating = product.rating || 4.5; // Placeholder; use real data
     const reviews = product.reviews || 123; // Placeholder
 
+    const imageCandidates = getProductImageCandidates(product);
+    const [primaryImage, ...fallbackImages] = imageCandidates;
+
     return (
       <div className="amazon-card">
         <Link to={`/product/${product.product_id}`}>
           <div className="amazon-img-wrap">
             <img
-              src={`http://localhost:1100/${product.image_path}`}
+              src={primaryImage}
+              data-fallbacks={JSON.stringify(fallbackImages)}
               alt={product.name}
-              onError={(e) => (e.target.src = "https://picsum.photos/300?product")}
+              onError={handleImageError}
+              loading="lazy" // NEW: Lazy load for performance
             />
           </div>
 
@@ -226,7 +361,12 @@ const Home = () => {
   );
 
   if (loading) return <div className="loading">Loading home page...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (error) return (
+    <div className="error">
+      <p>{error}</p>
+      <button onClick={retryFetch}>Retry</button>
+    </div>
+  );
 
   return (
     <div className="home-container">
@@ -237,7 +377,7 @@ const Home = () => {
           <Link to="/history" className="see-more">See more</Link>
         </div>
         <Slider {...productSettings}>
-          {historyProducts.map((product) => renderAmazonStyleCard(product))}
+          {historyProducts.map((product) => renderAmazonStyleCard(product)).filter(Boolean)} {/* Filter out invalid cards */}
         </Slider>
       </section>
 
@@ -272,7 +412,7 @@ const Home = () => {
         <h2 className="section-title">Today's Fashion Picks</h2>
         {topClothingProducts.length > 0 ? (
           <div className="fashion-grid">
-            {topClothingProducts.map((product) => renderGridAmazonCard(product))}
+            {topClothingProducts.map((product) => renderGridAmazonCard(product)).filter(Boolean)}
           </div>
         ) : (
           <div className="no-products">No clothing products available yet!</div>
@@ -283,7 +423,7 @@ const Home = () => {
       <section className="saving-zone">
         <h2 className="section-title">Super Saving Zone</h2>
         <Slider {...productSettings}>
-          {discountedProducts.map((product) => renderAmazonStyleCard(product))}
+          {discountedProducts.map((product) => renderAmazonStyleCard(product)).filter(Boolean)}
         </Slider>
       </section>
 
@@ -291,7 +431,7 @@ const Home = () => {
       <section className="featured-section">
         <h2 className="section-title">Featured Products</h2>
         <Slider {...productSettings}>
-          {featuredProducts.map((product) => renderAmazonStyleCard(product))}
+          {featuredProducts.map((product) => renderAmazonStyleCard(product)).filter(Boolean)}
         </Slider>
       </section>
 
@@ -299,7 +439,7 @@ const Home = () => {
       <section className="premium-section">
         <h2 className="section-title">Premium Collection</h2>
         <Slider {...premiumSettings}>
-          {premiumProducts.map((product) => renderAmazonStyleCard(product))}
+          {premiumProducts.map((product) => renderAmazonStyleCard(product)).filter(Boolean)}
         </Slider>
       </section>
 
@@ -335,7 +475,7 @@ const Home = () => {
       <section className="trending-section">
         <h2 className="section-title">Trending Now</h2>
         <Slider {...productSettings}>
-          {trendingProducts.map((product) => renderAmazonStyleCard(product))}
+          {trendingProducts.map((product) => renderAmazonStyleCard(product)).filter(Boolean)}
         </Slider>
       </section>
 
@@ -343,7 +483,7 @@ const Home = () => {
       <section className="match-section">
         <h2 className="section-title">Recommended For You</h2>
         <Slider {...productSettings}>
-          {matchForYou.map((product) => renderAmazonStyleCard(product))}
+          {matchForYou.map((product) => renderAmazonStyleCard(product)).filter(Boolean)}
         </Slider>
       </section>
 
@@ -352,7 +492,7 @@ const Home = () => {
         <h2 className="section-title">Beauty Essentials</h2>
         {topBeautyProducts.length > 0 ? (
           <div className="beauty-grid">
-            {topBeautyProducts.map((product) => renderGridAmazonCard(product))}
+            {topBeautyProducts.map((product) => renderGridAmazonCard(product)).filter(Boolean)}
           </div>
         ) : (
           <div className="no-products">No beauty products available yet!</div>

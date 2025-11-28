@@ -87,6 +87,7 @@ const Header = () => {
           <Link to="/shop">Shop</Link>
           <Link to="/orders">Orders</Link>
           <Link to="/contact">Contact</Link>
+          <Link to="/cart">Cart</Link>
         </nav>
 
         <div className="icons">

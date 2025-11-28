@@ -20,8 +20,28 @@ const Footer = () => {
           <h3>Download Our App</h3>
           <p>Shop anytime with our mobile app.</p>
           <div className="app-buttons">
-            <a href="#"><img src="https://via.placeholder.com/120x40?text=App+Store" alt="App Store" /></a>
-            <a href="#"><img src="https://via.placeholder.com/120x40?text=Google+Play" alt="Google Play" /></a>
+            <a
+              href="https://www.apple.com/app-store/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Download on the App Store"
+            >
+              <img
+                src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                alt="Download on the App Store"
+              />
+            </a>
+            <a
+              href="https://play.google.com/store"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Get it on Google Play"
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                alt="Get it on Google Play"
+              />
+            </a>
           </div>
         </div>
       </div>

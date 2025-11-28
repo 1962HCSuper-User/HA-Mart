@@ -1,15 +1,41 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Loader from "./Loader"; // Assuming Loader is in a separate file; adjust path as needed
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  useNavigate,
+  useLocation,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Loader from "./Loader";
+import PersonalInfo from "./PersonalInfo";
+import Cart from "./Cartgui";
+import Orders from "./Orders";
+import History from "./History";
+import Wallet from "./Wallet";
+import Transactions from "./Transactions";
+import Alerts from "./Alerts";
+import Notifications from "./Notifications";
+import Settings from "./Settings";
 import "./Profile.css";
+
+const menuItems = [
+  { label: "Profile", icon: "👤", path: "/profile" },
+  { label: "Home", icon: "🏠", path: "/" },
+  { label: "Cart", icon: "🛒", path: "/profile/cart" },
+  { label: "Order", icon: "📦", path: "/profile/orders" },
+  { label: "History", icon: "🕘", path: "/profile/history" },
+  { label: "Wallet", icon: "👛", path: "/profile/wallet" },
+  { label: "Transactions", icon: "💳", path: "/profile/transactions" },
+  { label: "Alert", icon: "🚨", path: "/profile/alerts" },
+  { label: "Notification", icon: "📣", path: "/profile/notifications" },
+  { label: "Settings", icon: "⚙️", path: "/profile/settings" },
+];
 
 const Profile = () => {
   const [user, setUser] = useState(null);
-  const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [profileImage, setProfileImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,12 +50,6 @@ const Profile = () => {
 
         if (res.ok) {
           setUser(data.user);
-          setFormData({
-            fullName: data.user.fullName || "",
-            address: data.user.address || "",
-            phone: data.user.phone || "",
-            bio: data.user.bio || "",
-          });
         } else {
           navigate("/login");
         }
@@ -42,38 +62,6 @@ const Profile = () => {
     fetchUser();
   }, [navigate]);
 
-  // Handle input change
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Save profile edits
-  const handleSave = async () => {
-    const token = localStorage.getItem("token");
-    try {
-      const res = await fetch("http://localhost:1100/api/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert(data.message);
-        setUser({ ...user, ...formData });
-        setEditing(false);
-      } else {
-        alert(data.error);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Server error");
-    }
-  };
-
-  // Upload profile image
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -84,7 +72,8 @@ const Profile = () => {
     formDataUpload.append("profileImage", file);
 
     try {
-      const res = await fetch("http://localhost:1100/api/upload-profile", {
+      // FIXED: Use correct endpoint /api/profile/upload-profile
+      const res = await fetch("http://localhost:1100/api/profile/upload-profile", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formDataUpload,
@@ -109,168 +98,116 @@ const Profile = () => {
     navigate("/login");
   };
 
+  const getInitials = (name = "") =>
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "U";
+
+  const isActive = (path) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    if (path === "/profile") {
+      return location.pathname === "/profile";
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  const sidebarEntries = useMemo(() => menuItems, []);
+
   if (!user) return <Loader />;
 
   return (
-    <div className="profile-container">
-      <header className="profile-header">
-        <h1 className="profile-title">Welcome, {user.fullName}</h1>
-        <p className="profile-subtitle">
-          Manage your account information and settings below.
-        </p>
-      </header>
-
-      <div className="profile-content">
-        <section className="profile-image-section">
-          <div className="image-wrapper">
-            {user.profile_image ? (
-              <img
-                src={`http://localhost:1100/${user.profile_image}`}
-                alt="Profile"
-                className="profile-img"
-              />
-            ) : (
-              <div className="image-placeholder">
-                <svg
-                  className="placeholder-icon"
-                  viewBox="0 0 64 64"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="32" cy="32" r="32" fill="#e2e8f0" />
-                  <path
-                    d="M32 18C27.0294 18 23 22.0294 23 27C23 32.5243 27.0294 37 32 37C36.9706 37 41 32.5243 41 27C41 22.0294 36.9706 18 32 18Z"
-                    stroke="#a0aec0"
-                    strokeWidth="2"
-                    strokeMiterlimit="10"
-                  />
-                  <path
-                    d="M16 44C16 40.6863 27.9129 37 32 37C36.0871 37 48 40.6863 48 44V46C48 47.1046 47.1046 48 46 48H18C16.8954 48 16 47.1046 16 46V44Z"
-                    stroke="#a0aec0"
-                    strokeWidth="2"
-                    strokeMiterlimit="10"
-                  />
-                </svg>
-                <p>No Image</p>
-              </div>
-            )}
-            <label className="upload-label">
-              {uploading ? "Uploading..." : "Change Photo"}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                hidden
-              />
-            </label>
+    <div className="profile-page">
+      <div className="profile-shell">
+        <aside className="profile-sidebar">
+          <div className="sidebar-brand">
+            <span className="brand-icon">C</span>
           </div>
-        </section>
-
-        <section className="profile-info-section">
-          <div className="profile-card">
-            <header className="card-header">
-              <h2 className="card-title">User Information</h2>
-              <div className="card-actions">
-                {editing ? (
-                  <button className="btn btn-save" onClick={handleSave}>
-                    Save Changes
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-edit"
-                    onClick={() => setEditing(true)}
-                  >
-                    Edit Profile
-                  </button>
-                )}
-                <button className="btn btn-logout" onClick={handleLogout}>
-                  Logout
-                </button>
-              </div>
-            </header>
-
-            <div className="info-grid">
-              <div className="info-item">
-                <label className="info-label">User ID</label>
-                <div className="info-value">{user.id}</div>
-              </div>
-
-              <div className="info-item">
-                <label className="info-label">Full Name</label>
-                <div className="info-value editable">
-                  {editing ? (
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="input-field"
-                    />
-                  ) : (
-                    user.fullName
-                  )}
-                </div>
-              </div>
-
-              <div className="info-item">
-                <label className="info-label">Email</label>
-                <div className="info-value">{user.email}</div>
-              </div>
-
-              <div className="info-item">
-                <label className="info-label">Address</label>
-                <div className="info-value editable">
-                  {editing ? (
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      className="input-field"
-                    />
-                  ) : (
-                    user.address || "Not Provided"
-                  )}
-                </div>
-              </div>
-
-              <div className="info-item">
-                <label className="info-label">Phone</label>
-                <div className="info-value editable">
-                  {editing ? (
-                    <input
-                      type="text"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="input-field"
-                    />
-                  ) : (
-                    user.phone || "Not Provided"
-                  )}
-                </div>
-              </div>
-
-              <div className="info-item">
-                <label className="info-label">Bio</label>
-                <div className="info-value editable">
-                  {editing ? (
-                    <textarea
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleChange}
-                      className="textarea-field"
-                      rows={3}
-                    />
-                  ) : (
-                    user.bio || "Not Provided"
-                  )}
-                </div>
+          <nav className="sidebar-menu">
+            {sidebarEntries.map((item) => (
+              <button
+                key={item.label}
+                className={`menu-item ${isActive(item.path) ? "active" : ""}`}
+                type="button"
+                onClick={() => navigate(item.path)}
+              >
+                <span className="menu-icon" aria-hidden>
+                  {item.icon}
+                </span>
+                <span className="menu-text">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+          <div className="sidebar-footer">
+            <div className="sidebar-profile">
+              {user.profile_image ? (
+                <img
+                  src={`http://localhost:1100/${user.profile_image}`}
+                  alt="User avatar"
+                />
+              ) : (
+                <div className="sidebar-initials">{getInitials(user.fullName)}</div>
+              )}
+              <div>
+                <p>{user.fullName}</p>
+                <span>{user.role || "Customer"}</span>
               </div>
             </div>
           </div>
-        </section>
+        </aside>
+
+        <main className="profile-main">
+          <section className="profile-hero-card">
+            <div className="hero-avatar">
+              {user.profile_image ? (
+                <img
+                  src={`http://localhost:1100/${user.profile_image}`}
+                  alt="Profile"
+                />
+              ) : (
+                <span className="hero-initials">{getInitials(user.fullName)}</span>
+              )}
+              <label className="hero-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  hidden
+                  disabled={uploading}
+                />
+                {uploading ? "Uploading..." : "Change photo"}
+              </label>
+            </div>
+            <div className="hero-summary">
+              <h1>{user.fullName}</h1>
+              <p>{user.role || "Customer"}</p>
+              <div className="hero-meta">
+                <span>ID: {user.id}</span>
+                <span>{user.email}</span>
+              </div>
+            </div>
+            <button className="hero-logout" onClick={handleLogout}>
+              Log out
+            </button>
+          </section>
+
+          <Routes>
+            <Route index element={<PersonalInfo user={user} />} />
+            <Route path="cart" element={<Cart navigate={navigate} />} />
+            <Route path="orders" element={<Orders navigate={navigate} />} />
+            <Route path="history" element={<History />} />
+            <Route path="wallet" element={<Wallet navigate={navigate} />} />
+            <Route path="transactions" element={<Transactions />} />
+            <Route path="alerts" element={<Alerts />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="*" element={<Navigate to="." replace />} />
+          </Routes>
+        </main>
       </div>
     </div>
   );
