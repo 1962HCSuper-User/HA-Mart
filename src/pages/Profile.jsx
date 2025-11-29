@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import Loader from "./Loader";
 import PersonalInfo from "./PersonalInfo";
-import Cart from "./Cartgui";
+import Cart from "./Cart";
 import Orders from "./Orders";
 import History from "./History";
 import Wallet from "./Wallet";
@@ -29,6 +29,7 @@ const menuItems = [
   { label: "Alert", icon: "🚨", path: "/profile/alerts" },
   { label: "Notification", icon: "📣", path: "/profile/notifications" },
   { label: "Settings", icon: "⚙️", path: "/profile/settings" },
+  
 ];
 
 const Profile = () => {
@@ -72,8 +73,7 @@ const Profile = () => {
     formDataUpload.append("profileImage", file);
 
     try {
-      // FIXED: Use correct endpoint /api/profile/upload-profile
-      const res = await fetch("http://localhost:1100/api/profile/upload-profile", {
+      const res = await fetch("http://localhost:1100/api/upload-profile", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formDataUpload,

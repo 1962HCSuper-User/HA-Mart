@@ -6,7 +6,6 @@ import HeroSlider from "./components/HeroSlider.jsx";
 import ProductCarousel from "./components/ProductCarousel.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
-import Cartgui from "./pages/Cartgui.jsx";
 import Cart from "./pages/Cart.jsx";
 import Profile from "./pages/Profile.jsx";
 import OrdersReturns from "./pages/OrdersReturns.jsx";
@@ -34,11 +33,6 @@ import List_Products from "./pages/SellerPages/List_Product.jsx";
 import UploadProduct from "./pages/UploadProduct.jsx";
 import AdminPan from "./pages/AdminProducts.jsx";
 import ProductForm from "./pages/SellerPages/ProductForm.jsx";
-import Payment from "./pages/Payment.jsx";
-import CreateWaller from "./pages/WalletCreate.jsx";
-import Wallet from "./pages/Wallet.jsx";
-import Order from "./pages/Orders.jsx";
-import WalletSetup from "./pages/WalletSetup.jsx";
 import "./App.css";
 
 function App() {
@@ -52,7 +46,6 @@ function App() {
       <Route path="/shop" element={<Shop />} />
       <Route path="/deals" element={<Deals />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/cartgui" element={<Cartgui />} />
       <Route path="/profile/*" element={<Profile />} />
       <Route path="/orders-returns" element={<OrdersReturns />} />
       <Route path="/login" element={<Login />} />
@@ -80,12 +73,6 @@ function App() {
       <Route path="/upload-product" element={<UploadProduct />} />
       <Route path="/admin-products" element={<AdminPan />} />
       <Route path="/product-form" element={<ProductForm />} />
-      <Route path="/checkout" element={<Payment />} />
-      <Route path="/payment" element={<Payment />} />
-      <Route path="/CreateWallet" element={<CreateWaller />} />
-      <Route path="wallet" element={<Wallet />} />
-      <Route path="/orders" element={<Order />} />
-      <Route path="/wallet-setup" element={<WalletSetup />} />
 
     </Routes>
   </main>
