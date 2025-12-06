@@ -1,9 +1,131 @@
+// Fixed ProductView.jsx - Add onClick handlers for "Add to Cart" and "Buy Now"
+// "Add to Cart" posts to API without navigating
+// "Buy Now" navigates directly to /checkout?product=${id} (bypasses cart)
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios"; // NEW: Import axios for Add to Cart API call
 import "./ProductView.css";
 import ProductCardLinear from "../ProductCard_Linear";
 import ProductCard_BigDiv from "../Big_PoductCard";
 import BuyWith from "../BuyWith";
+
+const API_BASE_URL = "http://localhost:1100";
+const PLACEHOLDER_IMAGE = "https://via.placeholder.com/600?text=No+Image";
+
+const safeParseJsonOrCsv = (value, isCsvFallback = true) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  let strValue = typeof value === "string" ? value : String(value);
+  try {
+    const parsed = JSON.parse(strValue);
+    if (Array.isArray(parsed)) return parsed;
+    return [];
+  } catch (parseErr) {
+    console.warn(
+      "JSON parse failed for field, falling back to CSV split:",
+      parseErr,
+      strValue
+    );
+    if (isCsvFallback) {
+      return strValue
+        .split(",")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+    }
+    return [];
+  }
+};
+
+const fixMojibake = (str) => {
+  return str
+    .replace(/â€™/g, "’")
+    .replace(/â'/g, "’")
+    .replace(/â€˜/g, "‘")
+    .replace(/â€œ/g, "“")
+    .replace(/â€/g, "”")
+    .replace(/â—/g, "—");
+};
+
+const buildAbsoluteUrl = (relativePath, encodeFilename = true) => {
+  if (!relativePath) return null;
+  let normalized = String(relativePath)
+    .replace(/\\/g, "/")
+    .replace(/^uploads\//i, "")
+    .replace(/^\/+/, "");
+
+  normalized = fixMojibake(normalized);
+
+  console.log(`Normalized filename (after mojibake fix): ${normalized}`);
+
+  if (encodeFilename) {
+    const parts = normalized.split("/");
+    if (parts.length > 0) {
+      parts[parts.length - 1] = encodeURIComponent(parts[parts.length - 1]);
+      normalized = parts.join("/");
+    }
+  }
+
+  const fullUrl = `${API_BASE_URL}/uploads/${normalized}`;
+  console.log(`Built image URL: ${fullUrl}`);
+  return fullUrl;
+};
+
+const getProductImageCandidates = (product) => {
+  const pickFirst = (input) => {
+    if (!input) return null;
+    if (Array.isArray(input)) {
+      const first = input[0];
+      if (typeof first === "string") return first;
+      if (first && typeof first === "object") return first.image_path || first.url;
+      return null;
+    }
+    if (typeof input === "object") return input.image_path || input.url;
+    return input;
+  };
+
+  let imagePaths = product.image_paths || [];
+  if (!Array.isArray(imagePaths) || imagePaths.length === 0) {
+    imagePaths = product.image_path ? [product.image_path] : [];
+  }
+
+  const rawCandidates = [
+    pickFirst(imagePaths),
+    pickFirst(product.images),
+    product.mainImage?.image_path,
+  ].filter(Boolean);
+
+  const buildVariants = (rawPath) => {
+    if (!rawPath) return [];
+    const normalized = String(rawPath).replace(/\\/g, "/").replace(/^\/+/, "");
+    if (/^https?:\/\//i.test(normalized)) return [normalized];
+
+    const variants = [
+      buildAbsoluteUrl(normalized, true),
+      buildAbsoluteUrl(normalized, false),
+      buildAbsoluteUrl(rawPath, false),
+    ].filter(Boolean);
+
+    return Array.from(new Set(variants));
+  };
+
+  const candidateObjects = rawCandidates
+    .map((rawPath) => {
+      const variants = buildVariants(rawPath);
+      if (!variants.length) return null;
+      return {
+        src: variants[0],
+        fallbacks: variants.slice(1),
+      };
+    })
+    .filter(Boolean);
+
+  if (!candidateObjects.length) {
+    return [{ src: PLACEHOLDER_IMAGE, fallbacks: [] }];
+  }
+
+  console.log(`Image candidates for ${product.name}:`, candidateObjects);
+  return candidateObjects;
+};
 
 export default function ProductPage() {
   const { id } = useParams(); // Get product_id from route, e.g., /product/:id
@@ -11,97 +133,10 @@ export default function ProductPage() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [cartMessage, setCartMessage] = useState(""); // NEW: For success/error messages
-
-  // 🔹 NEW: Copied from Home.jsx for image URL building and parsing
-  const safeParseJsonOrCsv = (value, isCsvFallback = true) => {
-    if (!value) return [];
-    if (Array.isArray(value)) return value;
-    let strValue = typeof value === 'string' ? value : String(value);
-    try {
-      const parsed = JSON.parse(strValue);
-      if (Array.isArray(parsed)) return parsed;
-      return [];
-    } catch (parseErr) {
-      console.warn("JSON parse failed for field, falling back to CSV split:", parseErr, strValue);
-      if (isCsvFallback) {
-        return strValue.split(',').map(item => item.trim()).filter(item => item.length > 0);
-      }
-      return [];
-    }
-  };
-
-  const API_BASE_URL = "http://localhost:1100";
-  const PLACEHOLDER_IMAGE = "https://via.placeholder.com/600?text=No+Image";
-
-  const fixMojibake = (str) => {
-    return str
-      .replace(/â€™/g, "’")
-      .replace(/â'/g, "’")
-      .replace(/â€˜/g, "‘")
-      .replace(/â€œ/g, "“")
-      .replace(/â€/g, "”")
-      .replace(/â—/g, "—");
-  };
-
-  const buildAbsoluteUrl = (relativePath, encodeFilename = true) => {
-    if (!relativePath) return null;
-    let normalized = String(relativePath)
-      .replace(/\\/g, "/")
-      .replace(/^uploads\//i, "")
-      .replace(/^\/+/, "");
-
-    normalized = fixMojibake(normalized);
-
-    console.log(`Normalized filename (after mojibake fix): ${normalized}`);
-
-    if (encodeFilename) {
-      const parts = normalized.split("/");
-      if (parts.length > 0) {
-        parts[parts.length - 1] = encodeURIComponent(parts[parts.length - 1]);
-        normalized = parts.join("/");
-      }
-    }
-
-    const fullUrl = `${API_BASE_URL}/uploads/${normalized}`;
-    console.log(`Built image URL: ${fullUrl}`);
-    return fullUrl;
-  };
-
-  const getProductImageCandidates = (product) => {
-    const pickFirst = (input) => {
-      if (!input) return null;
-      if (Array.isArray(input)) {
-        const first = input[0];
-        if (typeof first === "string") return first;
-        if (first && typeof first === "object") return first.image_path || first.url;
-        return null;
-      }
-      if (typeof input === "object") return input.image_path || input.url;
-      return input;
-    };
-
-    let imagePaths = product.image_paths || [];
-    if (!Array.isArray(imagePaths) || imagePaths.length === 0) {
-      imagePaths = product.image_path ? [product.image_path] : [];  // 🔹 NEW: Fallback if no array
-    }
-
-    const rawCandidates = [
-      pickFirst(imagePaths),
-      pickFirst(product.images),
-      product.mainImage?.image_path,
-    ].filter(Boolean);
-
-    if (rawCandidates.length === 0) return [PLACEHOLDER_IMAGE];
-
-    const variants = rawCandidates
-      .map((rawPath) => buildAbsoluteUrl(rawPath))
-      .filter(Boolean);
-
-    const unique = Array.from(new Set(variants));
-    console.log(`Image candidates for ${product.name}:`, unique);
-    return unique.length > 0 ? unique : [PLACEHOLDER_IMAGE];
-  };
+  const [imageCandidates, setImageCandidates] = useState([
+    { src: PLACEHOLDER_IMAGE, fallbacks: [] },
+  ]);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const handleImageError = (event) => {
     const imgUrl = event.target.src;
@@ -126,74 +161,38 @@ export default function ProductPage() {
     }
   };
 
-  // NEW: Add to Cart function
+  // NEW: Add to Cart handler (posts to API, shows success/error)
   const addToCart = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setCartMessage("Please log in to add to cart");
-      setTimeout(() => setCartMessage(""), 3000);
-      navigate("/login");
-      return;
-    }
-
     try {
-      const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ product_id: id }),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        setCartMessage(`Added to cart! (${result.cart_size} items)`);
-        setTimeout(() => setCartMessage(""), 3000);
-      } else {
-        setCartMessage(result.error || "Failed to add to cart");
-        setTimeout(() => setCartMessage(""), 3000);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to add to cart");
+        navigate("/login");
+        return;
       }
+      await axios.post(
+        "http://localhost:1100/api/cart/add",
+        { product_id: id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Added to cart successfully!");
     } catch (err) {
       console.error("Add to cart error:", err);
-      setCartMessage("Network error adding to cart");
-      setTimeout(() => setCartMessage(""), 3000);
+      alert(err.response?.data?.error || "Failed to add to cart");
     }
   };
 
-  // NEW: Buy Now function - Add to cart and redirect to checkout
-  const buyNow = async () => {
+  // NEW: Buy Now handler (navigates to checkout with product ID, skips cart)
+  const buyNow = () => {
+    // Optionally check auth
     const token = localStorage.getItem("token");
     if (!token) {
-      setCartMessage("Please log in to buy");
-      setTimeout(() => setCartMessage(""), 3000);
+      alert("Please log in to buy");
       navigate("/login");
       return;
     }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ product_id: id }),
-      });
-
-      if (response.ok) {
-        // Redirect to checkout with product_id in query params
-        navigate(`/checkout?product=${id}`);
-      } else {
-        const result = await response.json();
-        setCartMessage(result.error || "Failed to add to cart");
-        setTimeout(() => setCartMessage(""), 3000);
-      }
-    } catch (err) {
-      console.error("Buy now error:", err);
-      setCartMessage("Network error");
-      setTimeout(() => setCartMessage(""), 3000);
-    }
+    // Navigate directly to checkout with product query param
+    navigate(`/checkout?product=${id}`);
   };
 
   // Fetch product data - UPDATED: Parse JSON fields + ensure numeric fields
@@ -221,8 +220,10 @@ export default function ProductPage() {
             discount: parseFloat(result.product.discount) || 0,
             total_amt_after_discount: parseFloat(result.product.total_amt_after_discount) || 0,
           };
-          // 🔹 NEW: Log image candidates
-          console.log("Sample image candidates:", getProductImageCandidates(parsedProduct));
+          const candidates = getProductImageCandidates(parsedProduct);
+          console.log("Sample image candidates:", candidates);
+          setImageCandidates(candidates);
+          setActiveImageIndex(0);
           setProduct(parsedProduct);
         } else {
           setError(result.error || "Failed to load product");
@@ -310,42 +311,40 @@ export default function ProductPage() {
   // Calculate discount percentage - UPDATED: Use parsed numbers
   const discountPercent = Math.round(((product.base_price - product.total_amt_after_discount) / product.base_price) * 100);
 
-  const imageCandidates = getProductImageCandidates(product);
-  const [primaryImage, ...fallbackImages] = imageCandidates;
+  const activeImage =
+    imageCandidates[activeImageIndex] || { src: PLACEHOLDER_IMAGE, fallbacks: [] };
 
   return (
     <div className="page-wrapper">
-      {/* NEW: Cart message display */}
-      {cartMessage && (
-        <div className="cart-message">{cartMessage}</div>
-      )}
-
       {/* MAIN CONTAINER */}
       <div className="page-container">
         
-        {/* LEFT SIDE IMAGES - UPDATED: Use buildAbsoluteUrl + fallbacks */}
-        <div>
+        {/* LEFT SIDE IMAGES - UPDATED: Clickable gallery */}
+        <div className="gallery">
           <div className="thumb-list">
-            {product.image_paths.slice(1).map((imgPath, i) => {
-              const thumbUrl = buildAbsoluteUrl(imgPath);
-              return (
-                <div key={i} className="thumb-item">
-                  <img
-                    src={thumbUrl}
-                    data-fallbacks={JSON.stringify(fallbackImages)}  // 🔹 NEW: Fallbacks
-                    alt={`thumb ${i + 1}`}
-                    onError={handleImageError}
-                    loading="lazy"
-                  />
-                </div>
-              );
-            })}
+            {imageCandidates.map((candidate, i) => (
+              <button
+                key={`${candidate.src}-${i}`}
+                className={`thumb-item ${i === activeImageIndex ? "active" : ""}`}
+                onClick={() => setActiveImageIndex(i)}
+                type="button"
+                aria-label={`Preview image ${i + 1}`}
+              >
+                <img
+                  src={candidate.src}
+                  data-fallbacks={JSON.stringify(candidate.fallbacks)}
+                  alt={`thumb ${i + 1}`}
+                  onError={handleImageError}
+                  loading="lazy"
+                />
+              </button>
+            ))}
           </div>
           {/* MAIN IMAGE - UPDATED */}
           <div className="main-image">
             <img
-              src={primaryImage}
-              data-fallbacks={JSON.stringify(fallbackImages)}
+              src={activeImage.src}
+              data-fallbacks={JSON.stringify(activeImage.fallbacks)}
               alt={product.name}
               onError={handleImageError}
               loading="lazy"
@@ -384,7 +383,7 @@ export default function ProductPage() {
             </div>
           </div>
         </div>
-        {/* BUY BOX - UPDATED: Add onClick handlers */}
+        {/* BUY BOX - FIXED: Added onClick handlers */}
         <div className="buy-box">
           <p className="buy-price">₹{product.total_amt_after_discount.toFixed(2)}</p>
           <p className="buy-mrp">₹{product.base_price.toFixed(2)}</p>
@@ -439,8 +438,9 @@ export default function ProductPage() {
           <div className="bundle-grid">
             <div className="bundle-item">
               <img 
-                src={primaryImage} 
+                src={activeImage.src} 
                 alt={product.name} 
+                data-fallbacks={JSON.stringify(activeImage.fallbacks)}
                 onError={handleImageError}
               />
               <p>{product.name}</p>
@@ -527,18 +527,17 @@ export default function ProductPage() {
             {product.description || `Discover the ${product.name}. A premium ${product.type} with exceptional quality.`}
           </p>
           <div className="description-images">
-            {product.image_paths.slice(1, 4).map((imgPath, i) => {
-              const descUrl = buildAbsoluteUrl(imgPath);
-              return (
-                <img
-                  key={i}
-                  src={descUrl}
-                  alt={`Desc ${i + 1}`}
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                  loading="lazy"
-                />
-              );
-            })}
+            {imageCandidates.slice(1, 4).map((candidate, i) => (
+              <img
+                key={candidate.src + i}
+                src={candidate.src}
+                alt={`Desc ${i + 1}`}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }}
+                loading="lazy"
+              />
+            ))}
           </div>
         </div>
 

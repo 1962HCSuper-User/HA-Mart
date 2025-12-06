@@ -1,0 +1,38 @@
+.seller-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ccc;
+  border-radius: 8px;
+}
+
+.seller-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.seller-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+}
+
+.seller-container button {
+  width: 100%;
+  padding: 12px;
+  background: #2e7dff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.msg {
+  margin-top: 10px;
+  text-align: center;
+  color: green;
+  font-weight: bold;
+}

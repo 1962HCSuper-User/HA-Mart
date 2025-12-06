@@ -40,6 +40,11 @@ const Cart = () => {
     fetchCart();
   }, []);
 
+  // Navigate to product view
+  const viewProduct = (productId) => {
+    navigate(`/product/${productId}`);
+  };
+
   // Remove item from cart
   const removeFromCart = async (productId) => {
     if (!window.confirm("Remove this item from cart?")) return;
@@ -78,33 +83,45 @@ const Cart = () => {
           <div className="cart-items">
             {cart.map((item) => (
               <div key={item.product_id} className="cart-item">
-                <img
-                  src={`http://localhost:1100/${item.image_path || 'uploads/placeholder.jpg'}`}
-                  alt={item.name || item.title}
-                  className="cart-item-image"
-                  onLoad={() => console.log(`Image loaded: ${item.image_path}`)} // Debug: Confirm success
-                  onError={(e) => {
-                    console.error(`Image failed: ${item.image_path}`); // Debug: Log failures
-                    e.target.src = PLACEHOLDER_SVG; // FIXED: Local base64 fallback (no DNS issue)
-                  }}
-                />
-                <div className="cart-item-details">
-                  <h3>{item.title || item.name}</h3>
-                  <p className="description">{item.description?.substring(0, 100)}...</p> {/* Truncate desc */}
-                  <p className="price">
-                    {item.discount > 0 && (
-                      <span className="original-price">₹{parseFloat(item.base_price || 0).toFixed(2)}</span>
+                <div 
+                  className="cart-item-clickable" 
+                  onClick={() => viewProduct(item.product_id)}
+                  style={{ cursor: 'pointer', flex: 1 }} // Make clickable area
+                >
+                  <img
+                    src={`http://localhost:1100/${item.image_path || 'uploads/placeholder.jpg'}`}
+                    alt={item.name || item.title}
+                    className="cart-item-image"
+                    onLoad={() => console.log(`Image loaded: ${item.image_path}`)} // Debug: Confirm success
+                    onError={(e) => {
+                      console.error(`Image failed: ${item.image_path}`); // Debug: Log failures
+                      e.target.src = PLACEHOLDER_SVG; // FIXED: Local base64 fallback (no DNS issue)
+                    }}
+                  />
+                  <div className="cart-item-details">
+                    <h3>{item.title || item.name}</h3>
+                    <p className="description">{item.description?.substring(0, 100)}...</p> {/* Truncate desc */}
+                    <p className="price">
+                      {item.discount > 0 && (
+                        <span className="original-price">₹{parseFloat(item.base_price || 0).toFixed(2)}</span>
+                      )}
+                      ₹{parseFloat(item.total_amt_after_discount || 0).toFixed(2)}
+                    </p>
+                    {item.colours && item.colours.length > 0 && (
+                      <div className="colors">Colors: {item.colours.join(", ")}</div>
                     )}
-                    ₹{parseFloat(item.total_amt_after_discount || 0).toFixed(2)}
-                  </p>
-                  {item.colours && item.colours.length > 0 && (
-                    <div className="colors">Colors: {item.colours.join(", ")}</div>
-                  )}
-                  {item.tags && item.tags.length > 0 && (
-                    <div className="tags">Tags: {item.tags.join(", ")}</div>
-                  )}
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="tags">Tags: {item.tags.join(", ")}</div>
+                    )}
+                  </div>
                 </div>
-                <button onClick={() => removeFromCart(item.product_id)} className="remove-btn">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent navigation on remove click
+                    removeFromCart(item.product_id);
+                  }} 
+                  className="remove-btn"
+                >
                   Remove
                 </button>
               </div>

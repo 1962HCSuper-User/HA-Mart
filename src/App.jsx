@@ -39,6 +39,7 @@ import CreateWaller from "./pages/WalletCreate.jsx";
 import Wallet from "./pages/Wallet.jsx";
 import Order from "./pages/Orders.jsx";
 import WalletSetup from "./pages/WalletSetup.jsx";
+import SellerRegister from "./pages/SellerRegister.jsx";
 import "./App.css";
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
       <Route path="wallet" element={<Wallet />} />
       <Route path="/orders" element={<Order />} />
       <Route path="/wallet-setup" element={<WalletSetup />} />
+      <Route path="/seller-register" element={<SellerRegister />} />
 
     </Routes>
   </main>

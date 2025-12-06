@@ -1,4 +1,4 @@
-// Fixed Payment.jsx - Ensure numeric walletBalance + PIN for Wallet
+// Fixed Payment.jsx - Normalize image_path for direct product with uploads/ prefix
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -29,6 +29,37 @@ const Payment = () => {
   const [success, setSuccess] = useState(false);
   const [transactionId, setTransactionId] = useState(null);
   const [slip, setSlip] = useState(null);
+  // NEW: For direct buy product
+  const [directProduct, setDirectProduct] = useState(null);
+  const [isDirectBuy, setIsDirectBuy] = useState(false);
+
+  // Helper to normalize image path (add uploads/ prefix if missing)
+  const normalizeImagePath = (pathStr) => {
+    if (!pathStr) return 'uploads/placeholder.jpg';
+    let normalized = pathStr.replace(/\\/g, '/').trim();
+    if (!normalized.startsWith('uploads/')) {
+      normalized = 'uploads/' + normalized;
+    }
+    return normalized;
+  };
+
+  // Helper to get product info for toggle (from cart or direct)
+  const getProductInfo = (productId) => {
+    const cartItem = cart.find(c => c.product_id === productId);
+    if (cartItem) {
+      return {
+        price: parseFloat(cartItem.total_amt_after_discount) || 0,
+        name: cartItem.name || cartItem.title || 'Unknown'
+      };
+    }
+    if (directProduct && directProduct.product_id === productId) {
+      return {
+        price: directProduct.price,
+        name: directProduct.name || directProduct.title || 'Unknown'
+      };
+    }
+    return { price: 0, name: 'Unknown' };
+  };
 
   // Fetch data on mount
   useEffect(() => {
@@ -40,7 +71,7 @@ const Payment = () => {
           return;
         }
 
-        // Fetch cart
+        // Fetch cart (always, but may not use for display)
         const cartResponse = await axios.get("http://localhost:1100/api/cart", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -58,15 +89,57 @@ const Payment = () => {
         });
         setAddresses(addressesResponse.data.addresses || []);
 
-        // Pre-select products
+        // Handle direct product or cart selection
         const productId = new URLSearchParams(location.search).get("product");
-        let initialSelected = cartResponse.data.cart.map(p => ({ 
-          ...p, 
-          quantity: 1, 
-          price: parseFloat(p.total_amt_after_discount) || 0 
-        }));
+        let initialSelected = [];
         if (productId) {
-          initialSelected = initialSelected.filter(p => p.product_id == productId);
+          setIsDirectBuy(true);
+          const targetId = parseInt(productId);
+          // Always fetch the product for direct buy to ensure full details
+          try {
+            const productResponse = await axios.get(`http://localhost:1100/api/products/${productId}`);
+            let prod = productResponse.data.product;
+            const images = productResponse.data.images || []; // Handle old backend with images array
+            if (images.length > 0 && !prod.image_path) {
+              // If no image_path in product, use first image
+              prod.image_path = images[0].image_path || images[0].path;
+            }
+            // FIXED: Use first image from image_paths if image_path not set
+            if (!prod.image_path && prod.image_paths && prod.image_paths.length > 0) {
+              prod.image_path = prod.image_paths[0];
+            }
+            // FIXED: Normalize image_path for direct product
+            const normalizedImagePath = normalizeImagePath(prod.image_path);
+            const directItem = {
+              ...prod,
+              image_path: normalizedImagePath, // Ensure image_path is set and normalized
+              product_id: targetId,
+              quantity: 1,
+              price: parseFloat(prod.total_amt_after_discount) || 0
+            };
+            setDirectProduct(directItem);
+            initialSelected = [directItem];
+          } catch (fetchErr) {
+            console.error("Failed to fetch direct product:", fetchErr);
+            setError("Failed to load product details");
+            // Fallback: Use cart item if available
+            const cartItem = cartResponse.data.cart.find(p => parseInt(p.product_id) === targetId);
+            if (cartItem) {
+              initialSelected = [{
+                ...cartItem,
+                quantity: 1,
+                price: parseFloat(cartItem.total_amt_after_discount) || 0
+              }];
+            }
+          }
+        } else {
+          setIsDirectBuy(false);
+          // No direct, select all cart items
+          initialSelected = cartResponse.data.cart.map(p => ({
+            ...p,
+            quantity: 1,
+            price: parseFloat(p.total_amt_after_discount) || 0
+          }));
         }
         setSelectedProducts(initialSelected);
 
@@ -84,16 +157,22 @@ const Payment = () => {
     fetchData();
   }, [location.search, navigate]);
 
+  // Display products: ONLY direct if isDirectBuy, else cart
+  const displayProducts = isDirectBuy 
+    ? (directProduct ? [directProduct] : []) 
+    : cart;
+
   // Toggle product
   const toggleProduct = (productId) => {
+    const info = getProductInfo(productId);
     setSelectedProducts(prev =>
       prev.find(p => p.product_id === productId)
         ? prev.filter(p => p.product_id !== productId)
-        : [...prev, { 
-            product_id: productId, 
-            quantity: 1, 
-            price: parseFloat(cart.find(c => c.product_id === productId)?.total_amt_after_discount) || 0,
-            name: cart.find(c => c.product_id === productId)?.name || 'Unknown'
+        : [...prev, {
+            product_id: productId,
+            quantity: 1,
+            price: info.price,
+            name: info.name
           }]
     );
   };
@@ -209,11 +288,25 @@ const Payment = () => {
       setSuccess(true);
 
       if (response.data.success) {
-        await axios.delete("http://localhost:1100/api/cart/clear", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCart([]);
+        // FIXED: If not direct buy, remove selected from cart; for direct, do nothing
+        if (!isDirectBuy) {
+          for (const p of selectedProducts) {
+            try {
+              await axios.delete("http://localhost:1100/api/cart/remove", {
+                headers: { Authorization: `Bearer ${token}` },
+                data: { product_id: p.product_id },
+              });
+            } catch (removeErr) {
+              console.error("Failed to remove from cart:", removeErr);
+              // Continue, non-critical
+            }
+          }
+          // Update local cart state (remove selected)
+          setCart(prev => prev.filter(item => !selectedProducts.some(s => s.product_id === item.product_id)));
+        }
         setSelectedProducts([]);
+        setDirectProduct(null); // Clear direct
+        setIsDirectBuy(false);
         setPin(""); // Clear PIN
       }
     } catch (err) {
@@ -242,34 +335,40 @@ const Payment = () => {
           {/* Selected Products Summary */}
           <div className="products-section">
             <h2>Review Your Items ({selectedProducts.length} selected)</h2>
-            {cart.length === 0 ? (
-              <p>No items in cart. <button onClick={() => navigate("/cart")}>Add items</button></p>
+            {displayProducts.length === 0 ? (
+              <p>No items available. <button onClick={() => navigate(isDirectBuy ? `/product/${new URLSearchParams(location.search).get("product")}` : "/cart")}>Back</button></p>
             ) : (
-              cart.map((item) => {
-                const isSelected = selectedProducts.some(p => p.product_id === item.product_id);
+              displayProducts.map((item) => {
+                const itemId = parseInt(item.product_id);
+                const isSelected = selectedProducts.some(p => p.product_id === itemId);
+                // FIXED: Ensure image src uses normalized path and fallback
+                const imageSrc = `http://localhost:1100/${normalizeImagePath(item.image_path)}`;
                 return (
-                  <div key={item.product_id} className={`product-row ${isSelected ? 'selected' : ''}`}>
+                  <div key={itemId} className={`product-row ${isSelected ? 'selected' : ''}`}>
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={() => toggleProduct(item.product_id)}
+                      onChange={() => toggleProduct(itemId)}
                     />
                     <img 
-                      src={`http://localhost:1100/${item.image_path || 'uploads/placeholder.jpg'}`} 
-                      alt={item.name} 
+                      src={imageSrc}
+                      alt={item.name || item.title} 
                       width="50" 
-                      onError={(e) => { e.target.src = "https://via.placeholder.com/50?text=No+Image"; }}
+                      onError={(e) => { 
+                        console.error(`Image load failed for ${itemId}: ${imageSrc}`);
+                        e.target.src = "https://via.placeholder.com/50?text=No+Image"; 
+                      }}
                     />
                     <div className="product-info">
                       <span className="product-name">{item.title || item.name}</span>
-                      <span className="product-price">₹{parseFloat(item.total_amt_after_discount || 0).toFixed(2)}</span>
+                      <span className="product-price">₹{parseFloat(item.total_amt_after_discount || item.price || 0).toFixed(2)}</span>
                     </div>
                     {isSelected && (
                       <input
                         type="number"
                         min="1"
-                        value={selectedProducts.find(p => p.product_id === item.product_id)?.quantity || 1}
-                        onChange={(e) => updateQuantity(item.product_id, e.target.value)}
+                        value={selectedProducts.find(p => p.product_id === itemId)?.quantity || 1}
+                        onChange={(e) => updateQuantity(itemId, e.target.value)}
                         className="quantity-input"
                       />
                     )}
